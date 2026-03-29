@@ -1202,7 +1202,7 @@ def api_nlp_process_alerts():
     processed_alerts = []
     for alert in alerts:
         text = alert.get("message", "") + " " + alert.get("location", "")
-        nlp_result = api_nlp_analyze() if False else {"sentiment": {"label": "negative", "score": 0.7}, "severity": {"label": "high", "score": 0.75}}
+        nlp_result = {"sentiment": {"label": "negative", "score": 0.7}, "severity": {"label": "high", "score": 0.75}}
         
         # Update severity based on NLP
         alert["nlp_severity"] = nlp_result.get("severity", {}).get("label", "medium")
@@ -1460,36 +1460,6 @@ def api_camera_analyze(camera_id):
             "mobile": random.randint(0, 1)
         }
     })
-
-# ============================================================================
-# NLP PROCESSING ENDPOINTS
-# ============================================================================
-@app.route("/api/nlp/analyze", methods=["POST"])
-def api_nlp_analyze():
-    """Analyze text with NLP"""
-    data = request.get_json()
-    text = data.get("text", "")
-    
-    if NLP_ENABLED:
-        nlp = get_nlp_processor()
-        result = nlp.analyze_text(text)
-        return jsonify(result)
-    return jsonify({
-        "sentiment": {"label": "neutral", "score": 0.5},
-        "severity": {"label": "medium", "score": 0.5}
-    })
-
-@app.route("/api/nlp/alerts", methods=["POST"])
-def api_nlp_alerts():
-    """Process alerts with NLP"""
-    data = request.get_json()
-    alerts = data.get("alerts", [])
-    
-    if NLP_ENABLED:
-        nlp = get_nlp_processor()
-        summaries = nlp.batch_analyze_alerts(alerts)
-        return jsonify(summaries)
-    return jsonify(alerts)
 
 # ============================================================================
 # ENCRYPTION ENDPOINTS

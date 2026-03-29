@@ -23,9 +23,6 @@ requests==2.31.0
 # Security
 cryptography==41.0.7
 
-# Computer Vision
-opencv-python==4.9.0.80
-
 # Natural Language Processing
 nltk==3.8.1
 
