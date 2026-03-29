@@ -7,101 +7,120 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; }
         
-        /* Header */
         .header {
             background: linear-gradient(180deg, #12121a 0%, #0a0a0f 100%);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 15px 30px;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .logo { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 45px; height: 45px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-text p { font-size: 10px; color: #666; letter-spacing: 2px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 9px; color: #666; letter-spacing: 2px; }
         
-        .header-stats { display: flex; gap: 20px; }
-        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 10px 20px; text-align: center; }
-        .stat-box .value { font-size: 20px; font-weight: 700; color: #3b82f6; }
-        .stat-box .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .header-center { display: flex; gap: 8px; }
+        .tab-btn { padding: 8px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: #888; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .tab-btn.active { background: rgba(59,130,246,0.2); border-color: #3b82f6; color: #3b82f6; }
         
+        .header-right { display: flex; gap: 12px; align-items: center; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px 14px; text-align: center; }
+        .stat-box .value { font-size: 16px; font-weight: 700; color: #3b82f6; }
+        .stat-box .label { font-size: 9px; color: #666; text-transform: uppercase; }
         .clock-box { text-align: right; }
-        .clock { font-size: 28px; font-weight: 600; color: #fff; font-family: monospace; }
-        .date { font-size: 11px; color: #666; }
+        .clock { font-size: 22px; font-weight: 600; color: #fff; font-family: monospace; }
+        .date { font-size: 10px; color: #666; }
         
-        /* Main Content */
-        .main { display: grid; grid-template-columns: 1fr 380px; gap: 20px; padding: 20px; height: calc(100vh - 90px); }
+        .main { padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         
-        /* Map Section */
-        .map-container { background: #111118; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; position: relative; }
-        .map { width: 100%; height: 100%; background: #0c0c14; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         
-        .map-overlay { position: absolute; top: 15px; left: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-        .map-badge { background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 500; backdrop-filter: blur(10px); }
-        .map-badge.live { background: rgba(34,197,94,0.2); border-color: #22c55e; color: #22c55e; }
-        
-        .map-legend { position: absolute; bottom: 15px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; font-size: 11px; backdrop-filter: blur(10px); }
-        .legend-item { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-        
-        /* Sidebar */
-        .sidebar { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-        
-        .card { background: #111118; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; }
+        .card { background: #111118; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; }
         .card-title { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         
-        /* City Status */
-        .city-status { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .map-container { background: #111118; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; height: 500px; position: relative; }
+        #map { width: 100%; height: 100%; }
+        .map-overlay { position: absolute; top: 12px; left: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 6px; }
+        .map-badge { background: rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; font-size: 10px; backdrop-filter: blur(10px); }
+        .map-badge.live { background: rgba(34,197,94,0.2); border-color: #22c55e; color: #22c55e; }
+        
+        .status-badge { padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: 600; }
+        .status-low { background: rgba(34,197,94,0.2); color: #22c55e; }
         .status-normal { background: rgba(234,179,8,0.2); color: #eab308; }
         .status-heavy { background: rgba(249,115,22,0.2); color: #f97316; }
         .status-critical { background: rgba(239,68,68,0.2); color: #ef4444; }
-        .status-low { background: rgba(34,197,94,0.2); color: #22c55e; }
         
-        .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .progress-bar { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+        .progress-fill { height: 100%; border-radius: 3px; }
         
-        .area-list { margin-top: 15px; }
-        .area-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .area-name { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-        .area-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .area-score { font-family: monospace; font-size: 12px; font-weight: 600; }
-        
-        /* Signals */
-        .signal-list { max-height: 200px; overflow-y: auto; }
-        .signal-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 8px; }
-        .signal-light { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); }
-        .signal-green { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
-        .signal-yellow { background: #eab308; box-shadow: 0 0 10px #eab308; }
-        .signal-red { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .signal-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 6px; }
+        .signal-light { width: 12px; height: 12px; border-radius: 50%; }
+        .signal-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .signal-yellow { background: #eab308; box-shadow: 0 0 8px #eab308; }
+        .signal-red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
         .signal-info { flex: 1; }
-        .signal-name { font-size: 12px; font-weight: 500; }
-        .signal-phase { font-size: 10px; color: #666; }
-        .signal-time { font-family: monospace; font-size: 14px; font-weight: 600; }
+        .signal-name { font-size: 11px; font-weight: 500; }
+        .signal-phase { font-size: 9px; color: #666; }
+        .signal-time { font-family: monospace; font-size: 13px; font-weight: 600; }
         
-        /* Route Finder */
-        .route-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 13px; margin-bottom: 10px; outline: none; }
-        .route-input:focus { border-color: #3b82f6; }
-        .route-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
-        .route-btn:hover { transform: scale(1.02); }
+        .area-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 11px; }
+        .area-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
         
-        /* Forecast */
-        .forecast-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-        .forecast-item { text-align: center; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; }
-        .forecast-time { font-size: 10px; color: #666; }
-        .forecast-score { font-size: 18px; font-weight: 700; margin: 5px 0; }
+        .forecast-item { text-align: center; padding: 12px 8px; background: rgba(255,255,255,0.02); border-radius: 8px; }
+        .forecast-time { font-size: 9px; color: #666; }
+        .forecast-score { font-size: 20px; font-weight: 700; margin: 6px 0; }
         .forecast-status { font-size: 9px; color: #888; }
         
-        /* Leaflet overrides */
+        select, input, button { font-family: inherit; }
+        .route-input { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 12px; margin-bottom: 8px; outline: none; }
+        .route-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+        
+        .slider-group { margin-bottom: 12px; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 5px; }
+        input[type="range"] { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; -webkit-appearance: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #3b82f6; border-radius: 50%; cursor: pointer; }
+        
+        .predict-result { text-align: center; padding: 30px; }
+        .predict-score { font-size: 48px; font-weight: 700; }
+        .predict-label { font-size: 14px; color: #888; margin-top: 8px; }
+        
+        .chart-container { height: 200px; }
+        
+        .table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .table th { text-align: left; padding: 10px 8px; color: #666; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .table tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .violation-card { text-align: center; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 10px; }
+        .violation-icon { font-size: 28px; margin-bottom: 8px; }
+        .violation-count { font-size: 28px; font-weight: 700; }
+        .violation-label { font-size: 10px; color: #666; margin-top: 4px; }
+        
+        .nlp-result { padding: 15px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 10px; }
+        .nlp-sentiment { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .nlp-positive { background: rgba(34,197,94,0.2); color: #22c55e; }
+        .nlp-negative { background: rgba(239,68,68,0.2); color: #ef4444; }
+        .nlp-neutral { background: rgba(234,179,8,0.2); color: #eab308; }
+        
+        .cctv-camera { background: #000; border-radius: 10px; padding: 15px; text-align: center; }
+        .cctv-icon { font-size: 48px; margin-bottom: 10px; }
+        .cctv-label { font-size: 11px; color: #888; }
+        
         .leaflet-container { background: #0c0c14 !important; }
-        .leaflet-popup-content-wrapper { background: #1a1a24; color: #fff; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .leaflet-popup-content-wrapper { background: #1a1a24; color: #fff; border-radius: 10px; }
         .leaflet-popup-tip { background: #1a1a24; }
-        .leaflet-control-zoom a { background: #1a1a24 !important; color: #fff !important; border-color: rgba(255,255,255,0.1) !important; }
+        .leaflet-control-zoom a { background: #1a1a24 !important; color: #fff !important; }
     </style>
 </head>
 <body>
@@ -110,72 +129,274 @@
             <div class="logo-icon">🛣️</div>
             <div class="logo-text">
                 <h1>CYBERABAD TRAFFIC NEXUS</h1>
-                <p>HYDERABAD METRO COMMAND CENTER</p>
+                <p>HYDERABAD METRO COMMAND</p>
             </div>
         </div>
-        <div class="header-stats">
-            <div class="stat-box"><div class="value" id="vehicles">0</div><div class="label">Vehicles/hr</div></div>
-            <div class="stat-box"><div class="value" id="critical">0</div><div class="label">Critical</div></div>
-            <div class="stat-box"><div class="value" id="speed">0</div><div class="label">km/h Avg</div></div>
+        <div class="header-center">
+            <button class="tab-btn active" data-tab="map">🗺️ LIVE MAP</button>
+            <button class="tab-btn" data-tab="predict">🤖 ML PREDICT</button>
+            <button class="tab-btn" data-tab="forecast">🔮 FORECAST</button>
+            <button class="tab-btn" data-tab="analysis">📊 ANALYSIS</button>
+            <button class="tab-btn" data-tab="segments">🛣️ SEGMENTS</button>
+            <button class="tab-btn" data-tab="sensors">📡 SENSORS</button>
+            <button class="tab-btn" data-tab="alerts">🚨 ALERTS</button>
+            <button class="tab-btn" data-tab="optimizer">🚦 OPTIMIZER</button>
+            <button class="tab-btn" data-tab="model">🧠 MODEL</button>
+            <button class="tab-btn" data-tab="nlp">📝 NLP</button>
+            <button class="tab-btn" data-tab="cctv">📹 CCTV</button>
         </div>
-        <div class="clock-box">
-            <div class="clock" id="clock">00:00:00</div>
-            <div class="date" id="date">Loading...</div>
+        <div class="header-right">
+            <div class="stat-box"><div class="value" id="vehicles">0</div><div class="label">Vehicles</div></div>
+            <div class="stat-box"><div class="value" id="critical">0</div><div class="label">Critical</div></div>
+            <div class="clock-box">
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="date" id="date">Loading...</div>
+            </div>
         </div>
     </header>
     
     <main class="main">
-        <div class="map-container">
-            <div id="map" class="map"></div>
-            <div class="map-overlay">
-                <div class="map-badge live">● LIVE</div>
-                <div class="map-badge">🗺️ OSM</div>
-                <div class="map-badge">🚦 26 Junctions</div>
+        <!-- LIVE MAP -->
+        <section id="tab-map" class="tab-content active">
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-title">🏙️ City Status</div>
+                        <div style="display:flex;align-items:center;gap:15px;">
+                            <span id="city-status" class="status-badge status-normal">NORMAL</span>
+                            <span style="font-size:12px;color:#666;">Avg: <span id="avg-score" style="color:#fff;font-weight:600;">45%</span></span>
+                            <div class="progress-bar" style="flex:1;"><div id="progress-fill" class="progress-fill" style="width:45%;background:#eab308"></div></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:15px;">
+                            <div style="text-align:center;"><span class="area-dot" style="background:#ef4444"></span><div style="font-size:10px;color:#888;">Old City</div><div id="old-city" style="font-weight:600;">72%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#3b82f6"></span><div style="font-size:10px;color:#888;">IT Corridor</div><div id="it-corridor" style="font-weight:600;">42%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#f97316"></span><div style="font-size:10px;color:#888;">Central</div><div id="central" style="font-weight:600;">55%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#22c55e"></span><div style="font-size:10px;color:#888;">East ★</div><div id="east" style="font-weight:600;">38%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#8b5cf6"></span><div style="font-size:10px;color:#888;">South</div><div id="south" style="font-weight:600;">58%</div></div>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <div class="map-overlay">
+                            <div class="map-badge live">● LIVE</div>
+                            <div class="map-badge">🗺️ OSM</div>
+                            <div class="map-badge">🚦 26 Junctions</div>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card" style="margin-bottom:15px;">
+                        <div class="card-title">🚦 Live Signals</div>
+                        <div id="signal-list"></div>
+                    </div>
+                    <div class="card" style="margin-bottom:15px;">
+                        <div class="card-title">🛤️ Route Finder</div>
+                        <select class="route-input" id="origin"><option value="">Origin Junction</option></select>
+                        <select class="route-input" id="dest"><option value="">Destination Junction</option></select>
+                        <button class="route-btn" onclick="findRoute()">🔍 FIND SHORTEST PATH</button>
+                        <div id="route-result" style="margin-top:10px;font-size:11px;color:#888;display:none;"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📊 Forecast (6h)</div>
+                        <div id="forecast" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="map-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span>Old City</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>IT Corridor</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span>Central</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span>East (Uppal ★)</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>South</span></div>
-            </div>
-        </div>
+        </section>
         
-        <div class="sidebar">
-            <div class="card">
-                <div class="card-title">🏙️ City Overview</div>
-                <div class="city-status">
-                    <span id="city-status" class="status-badge status-normal">NORMAL</span>
-                    <span id="avg-score" style="font-size:12px;color:#666;">Avg: <span style="color:#fff;font-weight:600;">45%</span></span>
+        <!-- ML PREDICT -->
+        <section id="tab-predict" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">🤖 Random Forest Predictor</div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>🚗 Car</span><span id="car-val">50</span></div>
+                        <input type="range" id="car-slider" min="0" max="300" value="50" oninput="updateSlider('car')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>🏍️ Bike</span><span id="bike-val">30</span></div>
+                        <input type="range" id="bike-slider" min="0" max="100" value="30" oninput="updateSlider('bike')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>🚌 Bus</span><span id="bus-val">10</span></div>
+                        <input type="range" id="bus-slider" min="0" max="50" value="10" oninput="updateSlider('bus')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>🚛 Truck</span><span id="truck-val">15</span></div>
+                        <input type="range" id="truck-slider" min="0" max="50" value="15" oninput="updateSlider('truck')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>🕐 Hour</span><span id="hour-val">12:00 PM</span></div>
+                        <input type="range" id="hour-slider" min="0" max="23" value="12" oninput="updateSlider('hour')">
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <select class="route-input" id="day-select">
+                            <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
+                            <option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    <button class="route-btn" onclick="runPrediction()">🚀 RUN RF MODEL</button>
                 </div>
-                <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width:45%;background:#eab308"></div></div>
-                <div class="area-list">
-                    <div class="area-item"><span class="area-name"><span class="area-dot" style="background:#ef4444"></span>Old City</span><span class="area-score" style="color:#ef4444" id="old-city">72%</span></div>
-                    <div class="area-item"><span class="area-name"><span class="area-dot" style="background:#3b82f6"></span>IT Corridor</span><span class="area-score" style="color:#3b82f6" id="it-corridor">42%</span></div>
-                    <div class="area-item"><span class="area-name"><span class="area-dot" style="background:#f97316"></span>Central</span><span class="area-score" style="color:#f97316" id="central">55%</span></div>
-                    <div class="area-item"><span class="area-name"><span class="area-dot" style="background:#22c55e"></span>East ★</span><span class="area-score" style="color:#22c55e" id="east">38%</span></div>
-                    <div class="area-item"><span class="area-name"><span class="area-dot" style="background:#8b5cf6"></span>South</span><span class="area-score" style="color:#8b5cf6" id="south">58%</span></div>
+                <div class="card">
+                    <div class="card-title">📊 Prediction Result</div>
+                    <div id="predict-result">
+                        <div class="predict-result">
+                            <div class="predict-score" style="color:#3b82f6;">--</div>
+                            <div class="predict-label">Set parameters and run model</div>
+                        </div>
+                    </div>
+                    <div id="predict-details" style="margin-top:20px;"></div>
                 </div>
             </div>
-            
-            <div class="card">
-                <div class="card-title">🚦 Live Signals</div>
-                <div class="signal-list" id="signal-list"></div>
+        </section>
+        
+        <!-- FORECAST -->
+        <section id="tab-forecast" class="tab-content">
+            <div class="grid-3" style="margin-bottom:20px;">
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:10px;color:#666;">Current Score</div>
+                    <div id="hero-score" style="font-size:48px;font-weight:700;color:#eab308;">45%</div>
+                    <span id="hero-status" class="status-badge status-normal" style="margin-top:10px;">NORMAL</span>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:10px;color:#666;">Avg Speed</div>
+                    <div id="hero-speed" style="font-size:48px;font-weight:700;color:#3b82f6;">35</div>
+                    <div style="font-size:10px;color:#666;margin-top:10px;">km/h</div>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <div style="font-size:10px;color:#666;">Expected Delay</div>
+                    <div id="hero-delay" style="font-size:48px;font-weight:700;color:#f97316;">8</div>
+                    <div style="font-size:10px;color:#666;margin-top:10px;">minutes</div>
+                </div>
             </div>
-            
             <div class="card">
-                <div class="card-title">🛤️ Route Finder</div>
-                <select class="route-input" id="origin"><option value="">Select Origin</option></select>
-                <select class="route-input" id="dest"><option value="">Select Destination</option></select>
-                <button class="route-btn" onclick="findRoute()">🔍 Find Route</button>
-                <div id="route-result" style="margin-top:10px;font-size:12px;color:#888;display:none;"></div>
+                <div class="card-title">📈 24-Hour Forecast</div>
+                <div class="chart-container"><canvas id="forecastChart"></canvas></div>
             </div>
-            
-            <div class="card">
-                <div class="card-title">📊 Forecast (Next 6 Hours)</div>
-                <div class="forecast-grid" id="forecast"></div>
+        </section>
+        
+        <!-- ANALYSIS -->
+        <section id="tab-analysis" class="tab-content">
+            <div class="grid-2">
+                <div class="card"><div class="card-title">📈 Traffic Pattern</div><div class="chart-container"><canvas id="patternChart"></canvas></div></div>
+                <div class="card"><div class="card-title">🥧 Situation Distribution</div><div class="chart-container"><canvas id="distChart"></canvas></div></div>
+                <div class="card"><div class="card-title">📅 Weekly Pattern</div><div class="chart-container"><canvas id="weeklyChart"></canvas></div></div>
+                <div class="card"><div class="card-title">🚗 Vehicle Types</div><div class="chart-container"><canvas id="vehicleChart"></canvas></div></div>
             </div>
-        </div>
+        </section>
+        
+        <!-- SEGMENTS -->
+        <section id="tab-segments" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">🛣️ Road Segments (<span id="seg-count">30</span> roads)</div>
+                    <div style="max-height:450px;overflow-y:auto;">
+                        <table class="table"><thead><tr><th>#</th><th>Road</th><th>Area</th><th>Score</th><th>Status</th></tr></thead>
+                        <tbody id="segments-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card"><div class="card-title">🔥 Top Congested</div><div class="chart-container"><canvas id="topRoadsChart"></canvas></div></div>
+            </div>
+        </section>
+        
+        <!-- SENSORS -->
+        <section id="tab-sensors" class="tab-content">
+            <div class="grid-4" style="margin-bottom:20px;">
+                <div class="card" style="text-align:center;"><div style="font-size:28px;">🚗</div><div id="sensor-vehicles" style="font-size:24px;font-weight:700;color:#3b82f6;">156</div><div style="font-size:10px;color:#666;">Vehicles</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:28px;">📸</div><div id="sensor-speed" style="font-size:24px;font-weight:700;color:#8b5cf6;">38</div><div style="font-size:10px;color:#666;">Avg Speed</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:28px;">🤖</div><div style="font-size:24px;font-weight:700;color:#22c55e;">ACTIVE</div><div style="font-size:10px;color:#666;">AI Status</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:28px;">🌧️</div><div id="sensor-weather" style="font-size:24px;font-weight:700;color:#06b6d4;">CLEAR</div><div style="font-size:10px;color:#666;">Weather</div></div>
+            </div>
+            <div class="card"><div class="card-title">📡 Sensor Stream</div><div class="chart-container"><canvas id="sensorChart"></canvas></div></div>
+        </section>
+        
+        <!-- ALERTS -->
+        <section id="tab-alerts" class="tab-content">
+            <div class="grid-3" style="margin-bottom:20px;">
+                <div class="card" style="text-align:center;"><div id="total-alerts" style="font-size:32px;font-weight:700;color:#3b82f6;">0</div><div style="font-size:10px;color:#666;">Total Alerts</div></div>
+                <div class="card" style="text-align:center;"><div id="critical-alerts" style="font-size:32px;font-weight:700;color:#ef4444;">0</div><div style="font-size:10px;color:#666;">Critical</div></div>
+                <div class="card" style="text-align:center;"><div id="high-alerts" style="font-size:32px;font-weight:700;color:#f97316;">0</div><div style="font-size:10px;color:#666;">High Priority</div></div>
+            </div>
+            <div class="card"><div class="card-title">🚨 Alert Feed</div><div id="alerts-list" style="max-height:400px;overflow-y:auto;"></div></div>
+        </section>
+        
+        <!-- SIGNAL OPTIMIZER -->
+        <section id="tab-optimizer" class="tab-content">
+            <div class="grid-2">
+                <div class="card"><div class="card-title">🚦 Signal Optimization</div><div id="signal-cards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div></div>
+                <div>
+                    <div class="card" style="margin-bottom:15px;"><div class="card-title">📊 City Performance</div>
+                        <div class="area-item"><span>Junctions</span><span style="font-weight:600;">26</span></div>
+                        <div class="area-item"><span>Adaptive Signals</span><span style="font-weight:600;">18</span></div>
+                        <div class="area-item"><span>Avg Cycle</span><span style="font-weight:600;">90s</span></div>
+                        <div class="area-item"><span>Wait Reduction</span><span style="font-weight:600;color:#22c55e;">24%</span></div>
+                        <div class="area-item"><span>RF Accuracy</span><span style="font-weight:600;color:#3b82f6;">92.89%</span></div>
+                    </div>
+                    <div class="card"><div class="card-title">🌿 Environmental Impact</div>
+                        <div class="area-item"><span>CO₂ Saved</span><span id="co2-saved" style="font-weight:600;color:#22c55e;">1,247 kg</span></div>
+                        <div class="area-item"><span>Minutes Saved</span><span id="min-saved" style="font-weight:600;color:#22c55e;">342</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MODEL -->
+        <section id="tab-model" class="tab-content">
+            <div class="grid-2">
+                <div class="card"><div class="card-title">📊 Model Performance</div>
+                    <div class="area-item"><span>Algorithm</span><span style="font-weight:600;">Random Forest</span></div>
+                    <div class="area-item"><span>n_estimators</span><span style="font-weight:600;">200</span></div>
+                    <div class="area-item"><span>max_depth</span><span style="font-weight:600;">15</span></div>
+                    <div class="area-item"><span>Features</span><span style="font-weight:600;">12</span></div>
+                    <div class="area-item"><span>Accuracy</span><span style="font-weight:600;color:#22c55e;">92.89%</span></div>
+                    <div class="area-item"><span>CSV Records</span><span style="font-weight:600;color:#3b82f6;">8,928</span></div>
+                </div>
+                <div class="card"><div class="card-title">🎯 Feature Importance</div><div class="chart-container"><canvas id="featureChart"></canvas></div></div>
+            </div>
+        </section>
+        
+        <!-- NLP -->
+        <section id="tab-nlp" class="tab-content">
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom:15px;">
+                        <div class="card-title">📝 Traffic Text Analyzer</div>
+                        <textarea id="nlp-input" class="route-input" style="height:100px;resize:none;" placeholder="Enter traffic report...">Critical congestion at Charminar junction. Heavy traffic jam near Old City area.</textarea>
+                        <button class="route-btn" onclick="analyzeNLP()">🔍 ANALYZE</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🎭 Sentiment Overview</div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                            <div style="text-align:center;padding:15px;background:rgba(34,197,94,0.1);border-radius:8px;"><div id="pos-pct" style="font-size:24px;font-weight:700;color:#22c55e;">45%</div><div style="font-size:10px;color:#666;">Positive</div></div>
+                            <div style="text-align:center;padding:15px;background:rgba(234,179,8,0.1);border-radius:8px;"><div id="neu-pct" style="font-size:24px;font-weight:700;color:#eab308;">30%</div><div style="font-size:10px;color:#666;">Neutral</div></div>
+                            <div style="text-align:center;padding:15px;background:rgba(239,68,68,0.1);border-radius:8px;"><div id="neg-pct" style="font-size:24px;font-weight:700;color:#ef4444;">25%</div><div style="font-size:10px;color:#666;">Negative</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📊 Analysis Results</div>
+                    <div id="nlp-results"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CCTV -->
+        <section id="tab-cctv" class="tab-content">
+            <div class="grid-5" style="margin-bottom:20px;">
+                <div class="violation-card"><div class="violation-icon">🪖</div><div id="helmet-count" class="violation-count" style="color:#ef4444;">0</div><div class="violation-label">Helmet</div></div>
+                <div class="violation-card"><div class="violation-icon">📱</div><div id="mobile-count" class="violation-count" style="color:#f97316;">0</div><div class="violation-label">Mobile</div></div>
+                <div class="violation-card"><div class="violation-icon">⚡</div><div id="speed-count" class="violation-count" style="color:#eab308;">0</div><div class="violation-label">Over Speed</div></div>
+                <div class="violation-card"><div class="violation-icon">🔄</div><div id="lane-count" class="violation-count" style="color:#3b82f6;">0</div><div class="violation-label">Wrong Lane</div></div>
+                <div class="violation-card"><div class="violation-icon">🚦</div><div id="signal-count" class="violation-count" style="color:#8b5cf6;">0</div><div class="violation-label">Signal Jump</div></div>
+            </div>
+            <div class="grid-4">
+                <div class="cctv-camera"><div class="cctv-icon">🕌</div><div class="cctv-label">CHARMINAR</div><div style="margin-top:8px;font-size:11px;">CAM-01</div></div>
+                <div class="cctv-camera"><div class="cctv-icon">🏢</div><div class="cctv-label">HITEC CITY</div><div style="margin-top:8px;font-size:11px;">CAM-02</div></div>
+                <div class="cctv-camera"><div class="cctv-icon">🏘️</div><div class="cctv-label">UPPAL ★</div><div style="margin-top:8px;font-size:11px;">CAM-03</div></div>
+                <div class="cctv-camera"><div class="cctv-icon">🏪</div><div class="cctv-label">MEHDIPATNAM</div><div style="margin-top:8px;font-size:11px;">CAM-04</div></div>
+            </div>
+        </section>
     </main>
     
     <script>
@@ -183,6 +404,7 @@
         let map, markers = {}, trafficData = {};
         
         const AREA_COLORS = { OLD_CITY: '#ef4444', IT_CORRIDOR: '#3b82f6', CENTRAL: '#f97316', EAST: '#22c55e', SOUTH: '#8b5cf6' };
+        
         const JUNCTIONS = [
             {id:1,name:"Gachibowli",lat:17.44,lng:78.35,area:"IT_CORRIDOR"},
             {id:2,name:"HITEC City",lat:17.4417,lng:78.3819,area:"IT_CORRIDOR"},
@@ -214,20 +436,29 @@
         
         function init() {
             initMap();
+            initTabs();
             populateSelects();
             updateClock();
             loadData();
-            
-            setInterval(updateClock, 1000);
             setInterval(loadData, 5000);
+            setInterval(updateClock, 1000);
         }
         
         function initMap() {
-            map = L.map('map', { center: [17.42, 78.50], zoom: 11 });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '© OpenStreetMap © CARTO',
-                maxZoom: 19
-            }).addTo(map);
+            map = L.map('map', {center:[17.42,78.50], zoom:11});
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {maxZoom:19}).addTo(map);
+        }
+        
+        function initTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                    if (btn.dataset.tab === 'map') setTimeout(() => map.invalidateSize(), 100);
+                });
+            });
         }
         
         function populateSelects() {
@@ -241,8 +472,8 @@
         
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12: false});
-            document.getElementById('date').textContent = now.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'});
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12:false});
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
         }
         
         async function loadData() {
@@ -252,7 +483,7 @@
                 updateUI();
                 updateMapMarkers();
             } catch(e) {
-                console.error('Error:', e);
+                console.error('API Error:', e);
             }
         }
         
@@ -260,7 +491,6 @@
             const s = trafficData.stats || {};
             document.getElementById('vehicles').textContent = (s.totalVehicles || 0).toLocaleString();
             document.getElementById('critical').textContent = s.criticalRoads || 0;
-            document.getElementById('speed').textContent = Math.round(45 - (s.avgScore || 50) * 0.3);
             
             const sit = s.citySituation || 'Normal';
             const statusEl = document.getElementById('city-status');
@@ -268,11 +498,10 @@
             statusEl.className = 'status-badge status-' + sit.toLowerCase();
             
             const score = s.avgScore || 50;
-            document.getElementById('avg-score').innerHTML = 'Avg: <span style="color:#fff;font-weight:600;">' + score + '%</span>';
+            document.getElementById('avg-score').textContent = score + '%';
             document.getElementById('progress-fill').style.width = score + '%';
             document.getElementById('progress-fill').style.background = getScoreColor(score);
             
-            // Update area scores
             const areas = trafficData.areaBreakdown || {};
             if (areas.OLD_CITY) document.getElementById('old-city').textContent = Math.round(areas.OLD_CITY.avgScore) + '%';
             if (areas.IT_CORRIDOR) document.getElementById('it-corridor').textContent = Math.round(areas.IT_CORRIDOR.avgScore) + '%';
@@ -297,36 +526,28 @@
             
             (trafficData.junctions || []).forEach(j => {
                 const tl = j.trafficLight || {};
-                const waitTime = tl.time_remaining || 30;
+                const wait = tl.time_remaining || 30;
                 let tlColor = '#ef4444';
-                if (waitTime < 30) tlColor = '#22c55e';
-                else if (waitTime < 90) tlColor = '#eab308';
+                if (wait < 30) tlColor = '#22c55e';
+                else if (wait < 90) tlColor = '#eab308';
                 
                 const areaColor = AREA_COLORS[j.area] || '#666';
-                
                 const icon = L.divIcon({
-                    className: 'marker',
-                    html: `<div style="width:24px;height:24px;background:${tlColor};border-radius:50%;border:4px solid ${areaColor};box-shadow:0 0 20px ${tlColor}80;"></div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
+                    html: `<div style="width:20px;height:20px;background:${tlColor};border-radius:50%;border:3px solid ${areaColor};box-shadow:0 0 15px ${tlColor}80;"></div>`,
+                    iconSize: [20, 20], iconAnchor: [10, 10]
                 });
                 
                 const marker = L.marker([j.lat, j.lng], {icon}).addTo(map);
-                marker.bindPopup(`<b>${j.name}</b><br>Score: ${j.score}%<br>Speed: ${j.speed} km/h<br>Signal: ${waitTime}s<br>Vehicles: ${j.vehicleCount}`);
+                marker.bindPopup(`<b>${j.name}</b><br>Score: ${j.score}%<br>Speed: ${j.speed} km/h<br>Vehicles: ${j.vehicleCount}`);
                 markers[j.id] = marker;
             });
             
-            // Draw road segments
             if (trafficData.segments) {
                 trafficData.segments.forEach(s => {
                     const fromJ = trafficData.junctions.find(j => j.id === s.from);
                     const toJ = trafficData.junctions.find(j => j.id === s.to);
                     if (fromJ && toJ) {
-                        L.polyline([[fromJ.lat, fromJ.lng], [toJ.lat, toJ.lng]], {
-                            color: s.color || '#333',
-                            weight: 3,
-                            opacity: 0.6
-                        }).addTo(map);
+                        L.polyline([[fromJ.lat, fromJ.lng], [toJ.lat, toJ.lng]], {color: s.color || '#333', weight: 3, opacity: 0.5}).addTo(map);
                     }
                 });
             }
@@ -334,19 +555,16 @@
         
         function updateSignals() {
             const container = document.getElementById('signal-list');
-            const signals = (trafficData.junctions || []).slice(0, 8);
+            const signals = (trafficData.junctions || []).slice(0, 10);
             container.innerHTML = signals.map(j => {
                 const tl = j.trafficLight || {};
                 const wait = tl.time_remaining || 30;
-                let color = 'red', lightClass = 'signal-red';
+                let color = '#ef4444', lightClass = 'signal-red';
                 if (wait < 30) { color = '#22c55e'; lightClass = 'signal-green'; }
                 else if (wait < 90) { color = '#eab308'; lightClass = 'signal-yellow'; }
                 return `<div class="signal-item">
                     <div class="signal-light ${lightClass}"></div>
-                    <div class="signal-info">
-                        <div class="signal-name">${j.name}</div>
-                        <div class="signal-phase">${(tl.phase || 'NS_GREEN').replace('_', ' ')}</div>
-                    </div>
+                    <div class="signal-info"><div class="signal-name">${j.name}</div><div class="signal-phase">${(tl.phase||'NS_GREEN').replace('_',' ')}</div></div>
                     <div class="signal-time" style="color:${color}">${wait}s</div>
                 </div>`;
             }).join('');
@@ -354,20 +572,24 @@
         
         function updateForecast() {
             const container = document.getElementById('forecast');
-            const currentHour = new Date().getHours();
+            const hour = new Date().getHours();
             let html = '';
             for (let i = 0; i < 6; i++) {
-                const h = (currentHour + i) % 24;
-                const score = 30 + Math.sin(h / 24 * Math.PI * 2) * 25 + Math.random() * 10;
-                const status = score < 40 ? 'Low' : score < 60 ? 'Normal' : score < 80 ? 'Heavy' : 'Critical';
+                const h = (hour + i) % 24;
+                const score = 35 + Math.sin(h / 24 * Math.PI * 2) * 20 + Math.random() * 10;
+                const status = score < 40 ? 'Low' : score < 60 ? 'Normal' : score < 80 ? 'Heavy' : 'Crit';
                 const color = getScoreColor(score);
-                html += `<div class="forecast-item">
-                    <div class="forecast-time">${h}:00</div>
-                    <div class="forecast-score" style="color:${color}">${Math.round(score)}%</div>
-                    <div class="forecast-status">${status}</div>
-                </div>`;
+                html += `<div class="forecast-item"><div class="forecast-time">${h}:00</div><div class="forecast-score" style="color:${color}">${Math.round(score)}%</div><div class="forecast-status">${status}</div></div>`;
             }
             container.innerHTML = html;
+            
+            const heroScore = Math.round(35 + Math.sin(hour / 24 * Math.PI * 2) * 20);
+            document.getElementById('hero-score').textContent = heroScore + '%';
+            document.getElementById('hero-score').style.color = getScoreColor(heroScore);
+            document.getElementById('hero-speed').textContent = Math.round(45 - heroScore * 0.3);
+            document.getElementById('hero-delay').textContent = Math.round(heroScore * 0.2);
+            document.getElementById('hero-status').textContent = heroScore < 40 ? 'LOW' : heroScore < 60 ? 'NORMAL' : heroScore < 80 ? 'HEAVY' : 'CRITICAL';
+            document.getElementById('hero-status').className = 'status-badge status-' + (heroScore < 40 ? 'low' : heroScore < 60 ? 'normal' : heroScore < 80 ? 'heavy' : 'critical');
         }
         
         async function findRoute() {
@@ -377,23 +599,100 @@
             
             const result = document.getElementById('route-result');
             result.style.display = 'block';
-            result.innerHTML = '⏳ Calculating route...';
+            result.innerHTML = '⏳ Calculating...';
             
             try {
                 const res = await fetch(API + '/api/route', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({origin: parseInt(origin), destination: parseInt(dest)})
                 });
                 const data = await res.json();
-                
                 if (data.path && data.path.length > 0) {
-                    result.innerHTML = `📍 Route: ${data.path.length} junctions<br>⏱️ Distance: ${data.distance || 'N/A'}<br>🚦 Avg Congestion: <span style="color:${data.color}">${data.avgCongestion}%</span>`;
+                    result.innerHTML = `📍 Via ${data.path.length} junctions | 🚦 Avg: <span style="color:${data.color}">${data.avgCongestion}%</span>`;
                 } else {
                     result.innerHTML = '❌ No route found';
                 }
             } catch(e) {
                 result.innerHTML = '❌ Route error';
+            }
+        }
+        
+        function updateSlider(type) {
+            const slider = document.getElementById(type + '-slider');
+            const display = document.getElementById(type + '-val');
+            if (!slider || !display) return;
+            const val = slider.value;
+            if (type === 'hour') {
+                const h = parseInt(val);
+                display.textContent = h === 0 ? '12:00 AM' : h < 12 ? h + ':00 AM' : h === 12 ? '12:00 PM' : (h-12) + ':00 PM';
+            } else {
+                display.textContent = val;
+            }
+        }
+        
+        async function runPrediction() {
+            const car = document.getElementById('car-slider').value;
+            const bike = document.getElementById('bike-slider').value;
+            const bus = document.getElementById('bus-slider').value;
+            const truck = document.getElementById('truck-slider').value;
+            const hour = document.getElementById('hour-slider').value;
+            const day = document.getElementById('day-select').value;
+            
+            try {
+                const res = await fetch(API + '/predict', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({carCount: car, bikeCount: bike, busCount: bus, truckCount: truck, hour: hour, day: day, holiday: false, raining: false})
+                });
+                const data = await res.json();
+                displayPrediction(data);
+            } catch(e) {
+                console.error('Prediction error:', e);
+            }
+        }
+        
+        function displayPrediction(data) {
+            const result = document.getElementById('predict-result');
+            const score = data.score || 50;
+            const color = getScoreColor(score);
+            result.innerHTML = `<div class="predict-result"><div class="predict-score" style="color:${color}">${data.prediction || 'NORMAL'}</div><div class="predict-label">Score: ${score}% | Confidence: ${Math.round((data.confidence || 0.9) * 100)}%</div></div>`;
+            
+            const details = document.getElementById('predict-details');
+            details.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">Speed</div><div style="font-weight:600;">${data.speed || 35} km/h</div></div>
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">Delay</div><div style="font-weight:600;">${data.delay || 10} min</div></div>
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">NS Green</div><div style="font-weight:600;color:#22c55e;">${data.signalTiming?.nsGreen || 45}s</div></div>
+            </div>`;
+        }
+        
+        async function analyzeNLP() {
+            const text = document.getElementById('nlp-input').value;
+            const results = document.getElementById('nlp-results');
+            results.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Analyzing...</div>';
+            
+            try {
+                const res = await fetch(API + '/api/nlp/analyze', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text})
+                });
+                const data = await res.json();
+                
+                const sentiment = data.sentiment || {};
+                const sentimentClass = sentiment.label === 'positive' ? 'nlp-positive' : sentiment.label === 'negative' ? 'nlp-negative' : 'nlp-neutral';
+                
+                results.innerHTML = `
+                    <div class="nlp-result">
+                        <div style="margin-bottom:10px;"><span class="nlp-sentiment ${sentimentClass}">${(sentiment.label || 'neutral').toUpperCase()}</span></div>
+                        <div style="font-size:11px;color:#888;">Confidence: ${Math.round((sentiment.score || 0.5) * 100)}%</div>
+                    </div>
+                    <div class="nlp-result">
+                        <div style="font-size:10px;color:#666;margin-bottom:5px;">Keywords</div>
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                            ${(data.keywords || []).map(k => `<span style="padding:4px 8px;background:rgba(59,130,246,0.2);border-radius:4px;font-size:10px;">${k.word}</span>`).join('') || '<span style="color:#666;">None detected</span>'}
+                        </div>
+                    </div>
+                `;
+            } catch(e) {
+                results.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">Analysis failed</div>';
             }
         }
         
