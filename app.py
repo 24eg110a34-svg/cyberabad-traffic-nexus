@@ -68,7 +68,7 @@ except ImportError:
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = 'cyberabad_nexus_hyderabad'
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize database on startup
 if DATABASE_ENABLED:
@@ -641,7 +641,10 @@ def api_status():
 def api_traffic():
     hour = request.args.get('hour', type=int, default=datetime.now().hour)
     force_rain = request.args.get('rain', type=bool, default=False)
-    return jsonify(simulate_traffic(hour, force_rain))
+    print(f"[API] /api/traffic called - hour: {hour}")
+    result = simulate_traffic(hour, force_rain)
+    print(f"[API] Returning {len(result.get('junctions', []))} junctions, {len(result.get('segments', []))} segments")
+    return jsonify(result)
 
 @app.route("/api/junctions")
 def api_junctions():

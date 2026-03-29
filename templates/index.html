@@ -1265,18 +1265,15 @@
         async function loadData() {
             try {
                 const hour = isLiveMode ? '' : '?hour=' + selectedHour;
+                console.log('Fetching from:', API_BASE + '/api/traffic' + hour);
                 const res = await fetch(API_BASE + '/api/traffic' + hour);
                 if (!res.ok) throw new Error('API error: ' + res.status);
                 trafficData = await res.json();
+                console.log('Got traffic data:', Object.keys(trafficData));
             } catch (e) {
-                console.error('API error, using default data:', e);
-                // Default data fallback
-                trafficData = {
-                    stats: { totalVehicles: 12847, co2Tracked: 2847, minutesSaved: 342, criticalRoads: 3, citySituation: 'Normal', biryaniIndex: 3.2, avgScore: 45 },
-                    junctions: generateDefaultJunctions(),
-                    segments: generateDefaultSegments(),
-                    areaBreakdown: { OLD_CITY: { avgScore: 72, situation: 'Heavy' }, IT_CORRIDOR: { avgScore: 48, situation: 'Normal' }, CENTRAL: { avgScore: 55, situation: 'Normal' }, EAST: { avgScore: 38, situation: 'Low' }, SOUTH: { avgScore: 62, situation: 'Heavy' } }
-                };
+                console.error('API Error:', e);
+                alert('Cannot connect to Flask server. Make sure "python app.py" is running!');
+                return;
             }
             updateUI();
             updateMap();
@@ -1285,29 +1282,6 @@
             updateForecastPreview();
             updateSignalOptimizer();
             updateSensorDisplay();
-        }
-        
-        function generateDefaultJunctions() {
-            const names = ['Gachibowli', 'HITEC City', 'Kukatpally', 'Kondapur', 'Nanakramguda', 'Punjagutta', 'Begumpet', 'Banjara Hills', 'Masab Tank', 'Charminar', 'Chaderghat', 'Nampally', 'Koti', 'Madina', 'Laad Bazaar', 'Uppal ★', 'Ghatkesar ★', 'Habsiguda', 'Tarnaka', 'Mehdipatnam'];
-            const areas = ['IT_CORRIDOR', 'IT_CORRIDOR', 'IT_CORRIDOR', 'IT_CORRIDOR', 'IT_CORRIDOR', 'CENTRAL', 'CENTRAL', 'CENTRAL', 'CENTRAL', 'OLD_CITY', 'OLD_CITY', 'OLD_CITY', 'OLD_CITY', 'OLD_CITY', 'OLD_CITY', 'EAST', 'EAST', 'EAST', 'EAST', 'SOUTH'];
-            const coords = [[17.44, 78.35], [17.4417, 78.3819], [17.4943, 78.3996], [17.4512, 78.3723], [17.4435, 78.3612], [17.4376, 78.4501], [17.4447, 78.4634], [17.4156, 78.4375], [17.4056, 78.4523], [17.3616, 78.4747], [17.3712, 78.4823], [17.3856, 78.5012], [17.3856, 78.4747], [17.3698, 78.4789], [17.3589, 78.4712], [17.4089, 78.5631], [17.4512, 78.6912], [17.4156, 78.5323], [17.4289, 78.5423], [17.3912, 78.4323]];
-            return names.map((name, i) => ({
-                id: i + 1, name, lat: coords[i][0], lng: coords[i][1], area: areas[i],
-                score: 30 + Math.random() * 50, situation: 'Normal', speed: 35, delay: 8,
-                vehicleCount: 100 + Math.floor(Math.random() * 200),
-                trafficLight: { phase: 'NS_GREEN', time_remaining: Math.floor(Math.random() * 60) + 10, nsGreen: 45, ewGreen: 30, cycleTime: 90 }
-            }));
-        }
-        
-        function generateDefaultSegments() {
-            return [
-                { id: 1, name: 'Gachibowli - HITEC City', area: 'IT_CORRIDOR', score: 45, speed: 38, color: '#eab308', situation: 'Normal' },
-                { id: 2, name: 'HITEC City - Kondapur', area: 'IT_CORRIDOR', score: 52, speed: 35, color: '#eab308', situation: 'Normal' },
-                { id: 3, name: 'Punjagutta - Begumpet', area: 'CENTRAL', score: 58, speed: 32, color: '#f97316', situation: 'Heavy' },
-                { id: 4, name: 'Charminar - Chaderghat', area: 'OLD_CITY', score: 78, speed: 18, color: '#ef4444', situation: 'High' },
-                { id: 5, name: 'Uppal - Habsiguda', area: 'EAST', score: 35, speed: 42, color: '#22c55e', situation: 'Low' },
-                { id: 6, name: 'Mehdipatnam - Nanal Nagar', area: 'SOUTH', score: 65, speed: 25, color: '#f97316', situation: 'Heavy' },
-            ];
         }
 
         function updateUI() {
