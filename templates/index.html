@@ -1060,18 +1060,30 @@
 
         function init() {
             console.log('CYBERABAD: Initializing...');
-            document.getElementById('app').style.display = 'block';
-            document.getElementById('loading').classList.add('hidden');
-            initTabs();
-            populateSelects();
-            updateClock();
-            loadData();
-            setInterval(loadData, 5000);
-            setInterval(updateClock, 1000);
-            setInterval(loadAlerts, 10000);
-            setInterval(updateSignalCountdowns, 1000);
-            loadAlerts();
-            console.log('CYBERABAD: Initialization complete');
+            // Fallback - hide loading after 3 seconds no matter what
+            setTimeout(() => {
+                document.getElementById('app').style.display = 'block';
+                document.getElementById('loading').classList.add('hidden');
+            }, 3000);
+            
+            try {
+                document.getElementById('app').style.display = 'block';
+                initTabs();
+                populateSelects();
+                updateClock();
+                loadData();
+                setInterval(loadData, 5000);
+                setInterval(updateClock, 1000);
+                setInterval(loadAlerts, 10000);
+                setInterval(updateSignalCountdowns, 1000);
+                loadAlerts();
+                document.getElementById('loading').classList.add('hidden');
+                console.log('CYBERABAD: Initialization complete');
+            } catch(e) {
+                console.error('CYBERABAD init error:', e);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').style.display = 'block';
+            }
         }
 
         function initMap() {
