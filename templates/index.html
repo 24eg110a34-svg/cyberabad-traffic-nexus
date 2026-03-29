@@ -258,6 +258,12 @@
             <button data-tab="model" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
                 🧠 MODEL
             </button>
+            <button data-tab="nlp" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                📝 NLP
+            </button>
+            <button data-tab="cctv" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                📹 CCTV AI
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -729,6 +735,255 @@
                     </div>
                 </div>
             </section>
+
+            <!-- TAB 10: NLP ANALYSIS -->
+            <section id="tab-nlp" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5">
+                    <div class="space-y-4">
+                        <!-- Text Analyzer -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3 flex items-center gap-2">
+                                <span>📝</span> Traffic Text Analyzer (NLP)
+                            </h3>
+                            <div class="space-y-3">
+                                <textarea id="nlp-input" class="w-full h-24 p-3 rounded-lg bg-black/30 border border-white/10 text-sm resize-none" placeholder="Enter traffic report or alert message to analyze...">Critical congestion at Charminar junction. Heavy traffic jam reported near Old City area. Ambulance stuck in traffic for 30 minutes.</textarea>
+                                <button onclick="analyzeWithNLP()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">
+                                    🔍 Analyze Text
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Results -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">📊 Analysis Results</h3>
+                            <div id="nlp-results" class="space-y-3">
+                                <div class="text-center text-gray-500 text-sm py-4">Enter text and click "Analyze Text" to see NLP results</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sentiment Overview -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">🎭 City Sentiment Overview</h3>
+                            <div id="nlp-sentiment-summary" class="space-y-3">
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="text-center p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                                        <div class="text-2xl font-bold text-green-400">45%</div>
+                                        <div class="text-xs text-gray-400">Positive</div>
+                                    </div>
+                                    <div class="text-center p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                                        <div class="text-2xl font-bold text-yellow-400">30%</div>
+                                        <div class="text-xs text-gray-400">Neutral</div>
+                                    </div>
+                                    <div class="text-center p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                                        <div class="text-2xl font-bold text-red-400">25%</div>
+                                        <div class="text-xs text-gray-400">Negative</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NLP Insights -->
+                    <div class="space-y-4">
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">🔍 Keywords Detected</h3>
+                            <div id="nlp-keywords" class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs">congestion</span>
+                                <span class="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs">accident</span>
+                                <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs">weather</span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">⚠️ Severity Assessment</h3>
+                            <div id="nlp-severity">
+                                <div class="text-center text-gray-500 text-sm py-4">No analysis yet</div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">📍 Areas Identified</h3>
+                            <div id="nlp-areas" class="space-y-2">
+                                <div class="text-center text-gray-500 text-sm py-4">No areas detected</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 11: CCTV AI ANALYSIS -->
+            <section id="tab-cctv" class="tab-content">
+                <div class="space-y-5">
+                    <!-- Violations Summary -->
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="p-4 rounded-lg glass-card text-center">
+                            <div class="text-3xl mb-2">🪖</div>
+                            <div id="helmet-violations" class="font-mono text-2xl font-bold text-red-400">0</div>
+                            <div class="text-xs text-gray-400">Helmet Violations</div>
+                        </div>
+                        <div class="p-4 rounded-lg glass-card text-center">
+                            <div class="text-3xl mb-2">📱</div>
+                            <div id="mobile-violations" class="font-mono text-2xl font-bold text-orange-400">0</div>
+                            <div class="text-xs text-gray-400">Mobile Usage</div>
+                        </div>
+                        <div class="p-4 rounded-lg glass-card text-center">
+                            <div class="text-3xl mb-2">⚡</div>
+                            <div id="speed-violations" class="font-mono text-2xl font-bold text-yellow-400">0</div>
+                            <div class="text-xs text-gray-400">Over Speeding</div>
+                        </div>
+                        <div class="p-4 rounded-lg glass-card text-center">
+                            <div class="text-3xl mb-2">🔄</div>
+                            <div id="lane-violations" class="font-mono text-2xl font-bold text-blue-400">0</div>
+                            <div class="text-xs text-gray-400">Wrong Lane</div>
+                        </div>
+                        <div class="p-4 rounded-lg glass-card text-center">
+                            <div class="text-3xl mb-2">🚦</div>
+                            <div id="signal-violations" class="font-mono text-2xl font-bold text-purple-400">0</div>
+                            <div class="text-xs text-gray-400">Signal Jump</div>
+                        </div>
+                    </div>
+                    
+                    <!-- CCTV Camera Analysis -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <!-- Camera 1: Charminar -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-base font-semibold flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                    📹 CAM-01: Charminar
+                                </h3>
+                                <span class="text-xs text-gray-400">Live AI Analysis</span>
+                            </div>
+                            <div class="aspect-video bg-black/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🕌</div>
+                                    <div class="text-sm text-gray-400">CHARMINAR JUNCTION</div>
+                                </div>
+                                <div id="cam-01-overlay" class="absolute inset-0 p-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-red-500/80 rounded text-xs">🪖 No Helmet</span>
+                                        <span class="px-2 py-1 bg-yellow-500/80 rounded text-xs">⚡ Over Speed</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="cam-01-analysis" class="grid grid-cols-3 gap-2 text-center">
+                                <div><div class="text-xs text-gray-500">Vehicles</div><div class="font-mono font-bold text-blue-400">24</div></div>
+                                <div><div class="text-xs text-gray-500">Risk Level</div><div class="font-mono font-bold text-orange-400">MEDIUM</div></div>
+                                <div><div class="text-xs text-gray-500">Speed</div><div class="font-mono font-bold text-green-400">35 km/h</div></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Camera 2: HITEC City -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-base font-semibold flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                    📹 CAM-02: HITEC City
+                                </h3>
+                                <span class="text-xs text-gray-400">Live AI Analysis</span>
+                            </div>
+                            <div class="aspect-video bg-black/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🏢</div>
+                                    <div class="text-sm text-gray-400">HITEC CITY JUNCTION</div>
+                                </div>
+                                <div id="cam-02-overlay" class="absolute inset-0 p-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-orange-500/80 rounded text-xs">📱 Mobile</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="cam-02-analysis" class="grid grid-cols-3 gap-2 text-center">
+                                <div><div class="text-xs text-gray-500">Vehicles</div><div class="font-mono font-bold text-blue-400">42</div></div>
+                                <div><div class="text-xs text-gray-500">Risk Level</div><div class="font-mono font-bold text-red-400">HIGH</div></div>
+                                <div><div class="text-xs text-gray-500">Speed</div><div class="font-mono font-bold text-yellow-400">28 km/h</div></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Camera 3: Uppal -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-base font-semibold flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                    📹 CAM-03: Uppal
+                                </h3>
+                                <span class="text-xs text-gray-400">Live AI Analysis</span>
+                            </div>
+                            <div class="aspect-video bg-black/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🏘️</div>
+                                    <div class="text-sm text-gray-400">UPPAL CROSSROAD</div>
+                                </div>
+                                <div id="cam-03-overlay" class="absolute inset-0 p-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-green-500/80 rounded text-xs">✓ Clear</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="cam-03-analysis" class="grid grid-cols-3 gap-2 text-center">
+                                <div><div class="text-xs text-gray-500">Vehicles</div><div class="font-mono font-bold text-blue-400">18</div></div>
+                                <div><div class="text-xs text-gray-500">Risk Level</div><div class="font-mono font-bold text-green-400">LOW</div></div>
+                                <div><div class="text-xs text-gray-500">Speed</div><div class="font-mono font-bold text-green-400">48 km/h</div></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Camera 4: Mehdipatnam -->
+                        <div class="p-5 rounded-lg glass-card">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-base font-semibold flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                                    📹 CAM-04: Mehdipatnam
+                                </h3>
+                                <span class="text-xs text-gray-400">Live AI Analysis</span>
+                            </div>
+                            <div class="aspect-video bg-black/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🏪</div>
+                                    <div class="text-sm text-gray-400">MEHDIPATNAM</div>
+                                </div>
+                                <div id="cam-04-overlay" class="absolute inset-0 p-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-red-500/80 rounded text-xs">🪖 3 No Helmet</span>
+                                        <span class="px-2 py-1 bg-red-500/80 rounded text-xs">📱 2 Mobile</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="cam-04-analysis" class="grid grid-cols-3 gap-2 text-center">
+                                <div><div class="text-xs text-gray-500">Vehicles</div><div class="font-mono font-bold text-blue-400">31</div></div>
+                                <div><div class="text-xs text-gray-500">Risk Level</div><div class="font-mono font-bold text-red-400">HIGH</div></div>
+                                <div><div class="text-xs text-gray-500">Speed</div><div class="font-mono font-bold text-yellow-400">22 km/h</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Violations Trend Chart -->
+                    <div class="p-5 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-3">📈 Violations Trend (7 Days)</h3>
+                        <div class="h-48"><canvas id="violations-chart"></canvas></div>
+                    </div>
+                    
+                    <!-- Safety Recommendations -->
+                    <div class="p-5 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-3">🛡️ AI Safety Recommendations</h3>
+                        <div id="safety-recommendations" class="space-y-2">
+                            <div class="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                                <span class="text-xl">🚨</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-red-400">High Priority: Helmet Enforcement</div>
+                                    <div class="text-xs text-gray-400">3 locations need immediate attention</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                                <span class="text-xl">⚠️</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-yellow-400">Mobile Usage Spotted</div>
+                                    <div class="text-xs text-gray-400">AI detected 5 cases in last hour</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -806,6 +1061,8 @@
                     if (btn.dataset.tab === 'segments') initSegmentsTable();
                     if (btn.dataset.tab === 'sensors') initSensorChart();
                     if (btn.dataset.tab === 'model') initModelCharts();
+                    if (btn.dataset.tab === 'nlp') loadNLPSentiment();
+                    if (btn.dataset.tab === 'cctv') loadCCTVAnalysis();
                 });
             });
         }
@@ -819,6 +1076,173 @@
             });
             originSelect.selectedIndex = 0;
             destSelect.selectedIndex = 5;
+        }
+
+        // ========== NLP FUNCTIONS ==========
+        async function analyzeWithNLP() {
+            const text = document.getElementById('nlp-input').value;
+            if (!text.trim()) return;
+            
+            const resultsDiv = document.getElementById('nlp-results');
+            resultsDiv.innerHTML = '<div class="text-center p-4 text-gray-400">Analyzing...</div>';
+            
+            try {
+                const res = await fetch(API_BASE + '/api/nlp/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const result = await res.json();
+                displayNLPResults(result);
+                updateNLPSentiment(result);
+            } catch (e) {
+                resultsDiv.innerHTML = '<div class="text-center p-4 text-red-400">Analysis failed</div>';
+            }
+        }
+        
+        function displayNLPResults(result) {
+            const resultsDiv = document.getElementById('nlp-results');
+            const sentiment = result.sentiment || {};
+            const severity = result.severity || {};
+            const entities = result.entities || {};
+            const keywords = result.keywords || [];
+            
+            // Update severity display
+            const severityDiv = document.getElementById('nlp-severity');
+            const sevColor = severity.label === 'critical' ? 'red' : severity.label === 'high' ? 'orange' : severity.label === 'medium' ? 'yellow' : 'green';
+            severityDiv.innerHTML = `
+                <div class="text-center p-4 rounded-lg bg-${sevColor}-500/10 border border-${sevColor}-500/30">
+                    <div class="text-4xl font-bold text-${sevColor}-400 mb-2">${(severity.score * 100).toFixed(0)}%</div>
+                    <div class="text-sm text-gray-400">${severity.label?.toUpperCase() || 'UNKNOWN'} SEVERITY</div>
+                </div>
+            `;
+            
+            // Update keywords
+            const keywordsDiv = document.getElementById('nlp-keywords');
+            if (keywords.length > 0) {
+                keywordsDiv.innerHTML = keywords.map(k => 
+                    `<span class="px-3 py-1 rounded-full bg-${getCategoryColor(k.category)}-500/20 text-${getCategoryColor(k.category)}-400 text-xs">${k.word}</span>`
+                ).join('');
+            } else {
+                keywordsDiv.innerHTML = '<span class="text-xs text-gray-500">No keywords detected</span>';
+            }
+            
+            // Update areas
+            const areasDiv = document.getElementById('nlp-areas');
+            if (entities.areas && entities.areas.length > 0) {
+                areasDiv.innerHTML = entities.areas.map(area => 
+                    `<div class="flex items-center gap-2 p-2 rounded bg-${getAreaColor(area)}-500/10">
+                        <span class="w-2 h-2 rounded-full bg-${getAreaColor(area)}-500"></span>
+                        <span class="text-sm">${area.replace('_', ' ')}</span>
+                    </div>`
+                ).join('');
+            } else {
+                areasDiv.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No areas detected</div>';
+            }
+            
+            // Main results
+            resultsDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="p-3 rounded-lg bg-${sentiment.label === 'positive' ? 'green' : sentiment.label === 'negative' ? 'red' : 'yellow'}-500/10 border border-${sentiment.label === 'positive' ? 'green' : sentiment.label === 'negative' ? 'red' : 'yellow'}-500/30">
+                        <div class="text-xs text-gray-400 mb-1">Sentiment</div>
+                        <div class="font-semibold text-${sentiment.label === 'positive' ? 'green' : sentiment.label === 'negative' ? 'red' : 'yellow'}-400">${(sentiment.label || 'neutral').toUpperCase()}</div>
+                        <div class="text-xs text-gray-500">${((sentiment.score || 0.5) * 100).toFixed(0)}% confidence</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-${sevColor}-500/10 border border-${sevColor}-500/30">
+                        <div class="text-xs text-gray-400 mb-1">Severity</div>
+                        <div class="font-semibold text-${sevColor}-400">${(severity.label || 'unknown').toUpperCase()}</div>
+                        <div class="text-xs text-gray-500">${((severity.score || 0.5) * 100).toFixed(0)}% confidence</div>
+                    </div>
+                </div>
+                ${sentiment.is_actionable ? '<div class="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 text-sm text-orange-400">⚠️ This report requires immediate action</div>' : ''}
+            `;
+        }
+        
+        function getCategoryColor(category) {
+            const colors = { congestion: 'red', accident: 'orange', road_closure: 'purple', weather: 'blue', event: 'pink', emergency: 'cyan' };
+            return colors[category] || 'gray';
+        }
+        
+        function getAreaColor(area) {
+            const colors = { OLD_CITY: 'red', IT_CORRIDOR: 'blue', CENTRAL: 'orange', EAST: 'green', SOUTH: 'purple' };
+            return colors[area] || 'gray';
+        }
+        
+        function updateNLPSentiment(result) {
+            // Update overall sentiment summary
+        }
+        
+        async function loadNLPSentiment() {
+            try {
+                const res = await fetch(API_BASE + '/api/nlp/sentiment-summary');
+                const data = await res.json();
+                const summary = data.sentiments || { positive: 45, neutral: 30, negative: 25 };
+                document.getElementById('nlp-sentiment-summary').innerHTML = `
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="text-center p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                            <div class="text-2xl font-bold text-green-400">${summary.positive}%</div>
+                            <div class="text-xs text-gray-400">Positive</div>
+                        </div>
+                        <div class="text-center p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                            <div class="text-2xl font-bold text-yellow-400">${summary.neutral}%</div>
+                            <div class="text-xs text-gray-400">Neutral</div>
+                        </div>
+                        <div class="text-center p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                            <div class="text-2xl font-bold text-red-400">${summary.negative}%</div>
+                            <div class="text-xs text-gray-400">Negative</div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {}
+        }
+        
+        // ========== CCTV AI FUNCTIONS ==========
+        async function loadCCTVAnalysis() {
+            try {
+                const res = await fetch(API_BASE + '/api/cctv/violations-summary');
+                const data = await res.json();
+                
+                if (data.total_violations) {
+                    document.getElementById('helmet-violations').textContent = data.total_violations.helmet || 0;
+                    document.getElementById('mobile-violations').textContent = data.total_violations.mobile_phone || 0;
+                    document.getElementById('speed-violations').textContent = data.total_violations.over_speed || 0;
+                    document.getElementById('lane-violations').textContent = data.total_violations.wrong_lane || 0;
+                    document.getElementById('signal-violations').textContent = data.total_violations.signal_jump || 0;
+                }
+            } catch (e) {}
+            
+            // Update individual cameras
+            for (let cam = 1; cam <= 4; cam++) {
+                await updateCameraAnalysis(cam);
+            }
+        }
+        
+        async function updateCameraAnalysis(cameraId) {
+            try {
+                const res = await fetch(API_BASE + `/api/cctv/analyze/${cameraId}`);
+                const data = await res.json();
+                
+                if (data.analysis) {
+                    const analysis = data.analysis;
+                    const riskColor = analysis.risk_level === 'high' ? 'red' : analysis.risk_level === 'medium' ? 'orange' : 'green';
+                    
+                    document.getElementById(`cam-0${cameraId}-analysis`).innerHTML = `
+                        <div><div class="text-xs text-gray-500">Vehicles</div><div class="font-mono font-bold text-blue-400">${analysis.vehicle_count}</div></div>
+                        <div><div class="text-xs text-gray-500">Risk Level</div><div class="font-mono font-bold text-${riskColor}-400">${analysis.risk_level?.toUpperCase()}</div></div>
+                        <div><div class="text-xs text-gray-500">Speed</div><div class="font-mono font-bold text-green-400">${analysis.avg_speed} km/h</div></div>
+                    `;
+                    
+                    // Update overlay with violations
+                    const overlay = document.getElementById(`cam-0${cameraId}-overlay`);
+                    const violations = analysis.violations || {};
+                    let badges = [];
+                    if (violations.helmet > 0) badges.push(`<span class="px-2 py-1 bg-red-500/80 rounded text-xs">🪖 ${violations.helmet} No Helmet</span>`);
+                    if (violations.mobile_phone > 0) badges.push(`<span class="px-2 py-1 bg-orange-500/80 rounded text-xs">📱 ${violations.mobile_phone} Mobile</span>`);
+                    if (violations.over_speed > 0) badges.push(`<span class="px-2 py-1 bg-yellow-500/80 rounded text-xs">⚡ ${violations.over_speed} Speeding</span>`);
+                    if (badges.length === 0) badges.push(`<span class="px-2 py-1 bg-green-500/80 rounded text-xs">✓ Clear</span>`);
+                    overlay.innerHTML = `<div class="flex flex-wrap gap-2">${badges.join('')}</div>`;
+                }
+            } catch (e) {}
         }
 
         function updateClock() {

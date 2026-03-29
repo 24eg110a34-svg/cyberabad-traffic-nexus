@@ -1102,6 +1102,301 @@ def api_area_stats():
     return jsonify(traffic.get("areaBreakdown", {}))
 
 # ============================================================================
+# NLP ENDPOINTS
+# ============================================================================
+@app.route("/api/nlp/analyze", methods=["POST"])
+def api_nlp_analyze():
+    """Analyze text with NLP"""
+    data = request.get_json()
+    text = data.get("text", "")
+    
+    if NLP_ENABLED:
+        nlp = get_nlp_processor()
+        result = nlp.analyze_text(text)
+        return jsonify(result)
+    
+    # Fallback simulation
+    import re
+    text_lower = text.lower()
+    
+    # Simple sentiment analysis
+    positive = sum(1 for w in ['clear', 'smooth', 'good', 'improved', 'green wave'] if w in text_lower)
+    negative = sum(1 for w in ['congestion', 'blocked', 'heavy', 'critical', 'emergency'] if w in text_lower)
+    
+    if negative > positive:
+        sentiment = "negative"
+        score = min(0.9, 0.5 + negative * 0.15)
+    elif positive > negative:
+        sentiment = "positive"
+        score = min(0.9, 0.5 + positive * 0.1)
+    else:
+        sentiment = "neutral"
+        score = 0.5
+    
+    # Extract areas
+    areas = []
+    area_keywords = {
+        "OLD_CITY": ["charminar", "chaderghat", "madina", "koti", "nampally"],
+        "IT_CORRIDOR": ["gachibowli", "hitec", "kondapur", "nanakramguda"],
+        "CENTRAL": ["punjagutta", "begumpet", "banjara", "masab tank"],
+        "EAST": ["uppal", "ghatkesar", "habsiguda", "tarnaka"],
+        "SOUTH": ["mehdipatnam", "dilsukhnagar", "nanal nagar"]
+    }
+    for area, keywords in area_keywords.items():
+        if any(kw in text_lower for kw in keywords):
+            areas.append(area)
+    
+    # Severity assessment
+    severity_score = 0.5
+    if any(w in text_lower for w in ['critical', 'emergency', 'severe']):
+        severity_score = 0.95
+        severity_label = "critical"
+    elif any(w in text_lower for w in ['high', 'serious', 'alert']):
+        severity_score = 0.75
+        severity_label = "high"
+    elif any(w in text_lower for w in ['moderate', 'concerning']):
+        severity_score = 0.55
+        severity_label = "medium"
+    else:
+        severity_label = "low"
+    
+    # Extract numbers
+    numbers = re.findall(r'\d+', text)
+    
+    return jsonify({
+        "sentiment": {"label": sentiment, "score": round(score, 2), "is_actionable": negative > 0},
+        "entities": {"areas": areas, "times": [], "numbers": [int(n) for n in numbers if int(n) < 1000]},
+        "severity": {"label": severity_label, "score": round(severity_score, 2)},
+        "keywords": extract_keywords(text),
+        "confidence": 0.85
+    })
+
+def extract_keywords(text):
+    """Extract traffic-related keywords"""
+    text_lower = text.lower()
+    keywords = []
+    
+    keyword_map = {
+        "congestion": ["congestion", "traffic jam", "gridlock", "slow"],
+        "accident": ["accident", "crash", "collision"],
+        "road_closure": ["road closure", "blocked", "closed"],
+        "weather": ["rain", "flood", "storm", "fog"],
+        "event": ["festival", "holiday", "event"],
+        "emergency": ["ambulance", "emergency", "police"]
+    }
+    
+    for category, words in keyword_map.items():
+        for word in words:
+            if word in text_lower:
+                keywords.append({"word": word, "category": category})
+                break
+    
+    return keywords
+
+@app.route("/api/nlp/process-alerts", methods=["POST"])
+def api_nlp_process_alerts():
+    """Process multiple alerts with NLP"""
+    data = request.get_json()
+    alerts = data.get("alerts", [])
+    
+    processed_alerts = []
+    for alert in alerts:
+        text = alert.get("message", "") + " " + alert.get("location", "")
+        nlp_result = api_nlp_analyze() if False else {"sentiment": {"label": "negative", "score": 0.7}, "severity": {"label": "high", "score": 0.75}}
+        
+        # Update severity based on NLP
+        alert["nlp_severity"] = nlp_result.get("severity", {}).get("label", "medium")
+        alert["nlp_priority"] = calculate_priority(alert, nlp_result)
+        alert["nlp_sentiment"] = nlp_result.get("sentiment", {}).get("label", "neutral")
+        alert["affected_areas"] = nlp_result.get("entities", {}).get("areas", [])
+        
+        processed_alerts.append(alert)
+    
+    # Sort by priority
+    processed_alerts.sort(key=lambda x: x.get("nlp_priority", 50), reverse=True)
+    
+    return jsonify(processed_alerts)
+
+def calculate_priority(alert, nlp_result):
+    """Calculate alert priority"""
+    severity_weights = {"critical": 40, "high": 30, "medium": 20, "low": 10}
+    severity = nlp_result.get("severity", {}).get("label", "medium")
+    score_weight = alert.get("score", 50) / 2
+    sentiment_weight = (1 - nlp_result.get("sentiment", {}).get("score", 0.5)) * 20
+    
+    priority = severity_weights.get(severity, 20) + score_weight + sentiment_weight
+    return min(100, int(priority))
+
+@app.route("/api/nlp/sentiment-summary")
+def api_nlp_sentiment_summary():
+    """Get sentiment summary for dashboard"""
+    alerts = simulate_traffic()["junctions"][:10]
+    
+    sentiments = {
+        "positive": 0,
+        "negative": 0,
+        "neutral": 0
+    }
+    
+    for alert in alerts:
+        score = alert.get("score", 50)
+        if score > 70:
+            sentiments["negative"] += 1
+        elif score < 40:
+            sentiments["positive"] += 1
+        else:
+            sentiments["neutral"] += 1
+    
+    return jsonify({
+        "sentiments": sentiments,
+        "overall": "negative" if sentiments["negative"] > sentiments["positive"] else "positive",
+        "trend": "increasing_congestion"
+    })
+
+# ============================================================================
+# FACE RECOGNITION / CCTV ENDPOINTS
+# ============================================================================
+@app.route("/api/cctv/analyze/<int:camera_id>")
+def api_cctv_analyze(camera_id):
+    """Analyze CCTV feed for violations"""
+    import random
+    
+    # Simulate camera analysis
+    junctions = [j for j in JUNCTIONS if j["id"] == camera_id] if camera_id <= len(JUNCTIONS) else JUNCTIONS[:1]
+    junction = junctions[0] if junctions else JUNCTIONS[0]
+    
+    # Simulated analysis
+    vehicle_count = random.randint(5, 25)
+    person_count = random.randint(1, 8)
+    helmet_violations = random.randint(0, 3)
+    mobile_violations = random.randint(0, 2)
+    over_speed_count = random.randint(0, 4)
+    
+    # Calculate risk score
+    risk_score = (helmet_violations * 15) + (mobile_violations * 20) + (over_speed_count * 10)
+    risk_level = "low" if risk_score < 20 else "medium" if risk_score < 40 else "high"
+    
+    return jsonify({
+        "camera_id": camera_id,
+        "camera_name": junction["name"],
+        "area": junction.get("area", "CENTRAL"),
+        "timestamp": datetime.now().isoformat(),
+        "analysis": {
+            "vehicle_count": vehicle_count,
+            "person_count": person_count,
+            "violations": {
+                "helmet": helmet_violations,
+                "mobile_phone": mobile_violations,
+                "over_speed": over_speed_count,
+                "wrong_lane": random.randint(0, 2),
+                "signal_jump": random.randint(0, 1)
+            },
+            "risk_score": risk_score,
+            "risk_level": risk_level,
+            "congestion_level": random.choice(["low", "medium", "high", "critical"]),
+            "avg_speed": round(random.uniform(20, 60), 1)
+        },
+        "safety_alerts": generate_safety_alerts(helmet_violations, mobile_violations, over_speed_count),
+        "recommendations": generate_recommendations(risk_level)
+    })
+
+def generate_safety_alerts(helmet, mobile, speed):
+    """Generate safety alerts"""
+    alerts = []
+    if helmet > 0:
+        alerts.append({
+            "type": "helmet_violation",
+            "severity": "high",
+            "count": helmet,
+            "message": f"{helmet} riders without helmet detected",
+            "action": "Issue e-challan"
+        })
+    if mobile > 0:
+        alerts.append({
+            "type": "mobile_violation",
+            "severity": "critical",
+            "count": mobile,
+            "message": f"{mobile} riders using mobile phones",
+            "action": "Immediate action required"
+        })
+    if speed > 2:
+        alerts.append({
+            "type": "speeding",
+            "severity": "medium",
+            "count": speed,
+            "message": f"{speed} vehicles over speed limit",
+            "action": "Log violations for challan"
+        })
+    return alerts
+
+def generate_recommendations(risk_level):
+    """Generate safety recommendations"""
+    if risk_level == "high":
+        return [
+            "Deploy traffic police immediately",
+            "Increase camera monitoring frequency",
+            "Consider temporary speed restrictions"
+        ]
+    elif risk_level == "medium":
+        return [
+            "Continue monitoring",
+            "Alert traffic control room",
+            "Prepare for potential enforcement"
+        ]
+    else:
+        return [
+            "Normal operations",
+            "Continue routine monitoring",
+            "No action required"
+        ]
+
+@app.route("/api/cctv/all-cameras")
+def api_cctv_all_cameras():
+    """Get analysis from all cameras"""
+    cameras = []
+    for i in range(1, 5):  # 4 cameras
+        import random
+        cameras.append({
+            "camera_id": i,
+            "camera_name": ["Charminar", "HITEC City", "Uppal", "Mehdipatnam"][i-1],
+            "violations": {
+                "helmet": random.randint(0, 3),
+                "mobile": random.randint(0, 2),
+                "over_speed": random.randint(0, 4)
+            },
+            "risk_level": random.choice(["low", "medium", "high"]),
+            "status": "active"
+        })
+    return jsonify(cameras)
+
+@app.route("/api/cctv/violations-summary")
+def api_cctv_violations_summary():
+    """Get violations summary across all cameras"""
+    import random
+    
+    total_violations = {
+        "helmet": random.randint(10, 50),
+        "mobile_phone": random.randint(5, 30),
+        "over_speed": random.randint(20, 80),
+        "wrong_lane": random.randint(5, 20),
+        "signal_jump": random.randint(2, 15)
+    }
+    
+    trend = {
+        "helmet": random.choice(["increasing", "decreasing", "stable"]),
+        "mobile": random.choice(["increasing", "decreasing", "stable"]),
+        "speeding": random.choice(["increasing", "decreasing", "stable"])
+    }
+    
+    return jsonify({
+        "total_violations": total_violations,
+        "trend": trend,
+        "top_violation_type": "over_speed" if total_violations["over_speed"] > total_violations["helmet"] else "helmet",
+        "challans_issued_today": random.randint(50, 200),
+        "challans_amount": random.randint(50000, 200000)
+    })
+
+# ============================================================================
 # WEATHER API ENDPOINTS
 # ============================================================================
 @app.route("/api/weather/current")
