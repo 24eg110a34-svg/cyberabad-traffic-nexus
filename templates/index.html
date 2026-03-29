@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBERABAD TRAFFIC NEXUS - Hyderabad Metro Command</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'navy': { 900: '#030c1a', 800: '#060f1e', 700: '#0d1b2a', 600: '#132232' },
+                        'accent': '#3b82f6',
+                        'emergency-bg': '#1a0505',
+                        'rain-bg': '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* === NEW CLEAN BACKGROUND - MINIMALIST DARK === */
+        body { 
+            font-family: 'IBM Plex Sans', system-ui, sans-serif; 
+            background: #0c0c0e;
+            color: #f4f4f5; 
+            min-height: 100vh;
+        }
+        
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* === MINIMAL FADE === */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.3s ease-out; }
+        
+        /* === VIDEO CARS === */
+        .stream-car {
+            position: absolute;
+            left: -50px;
+            top: var(--top, 45%);
+            animation: car-stream 5s linear infinite;
+            animation-delay: var(--delay, 0s);
+        }
+        @keyframes car-stream {
+            0% { left: -50px; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { left: calc(100% + 50px); opacity: 0; }
+        }
+        
+        .road-stream {
+            background: repeating-linear-gradient(90deg, #2a2a2e 0px, #2a2a2e 30px, #3a3a3e 30px, #3a3a3e 32px);
+            animation: road-move 2s linear infinite;
+        }
+        @keyframes road-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 32px 0; }
+        }
+        
+        /* === MODES === */
+        body.emergency-mode { background: #120808 !important; }
+        body.rain-mode { background: #0c0e14 !important; }
+        body.festival-mode { background: #0e0a14 !important; }
+        
+        /* === ESSENTIAL ANIMATIONS === */
+        @keyframes fadeIn { opacity: 0; to { opacity: 1; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes glow-green { 0%, 100% { box-shadow: 0 0 15px #22c55e; } 50% { box-shadow: 0 0 30px #22c55e; } }
+        @keyframes glow-yellow { 0%, 100% { box-shadow: 0 0 15px #eab308; } 50% { box-shadow: 0 0 30px #eab308; } }
+        @keyframes glow-red { 0%, 100% { box-shadow: 0 0 15px #ef4444; } 50% { box-shadow: 0 0 30px #ef4444; } }
+        
+        .animate-fade-in-up { animation: fadeUp 0.4s ease-out; }
+        .animate-blink { animation: blink 2s ease-in-out infinite; }
+        .animate-glow-green { animation: glow-green 2s ease-in-out infinite; }
+        .animate-glow-red { animation: glow-red 1.5s ease-in-out infinite; }
+        .animate-glow-yellow { animation: glow-yellow 1.5s ease-in-out infinite; }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        
+        /* === CARDS === */
+        .glass-card { 
+            background: rgba(18, 18, 22, 0.95); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-card:hover { 
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* === PROGRESS BAR === */
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+        
+        /* === BUTTONS === */
+        .btn-primary {
+            background: #2563eb;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background: #3b82f6;
+            transform: translateY(-1px);
+        }
+        
+        /* === TRAFFIC LIGHT STYLES === */
+        .traffic-light-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .traffic-light {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .traffic-light.green { background: #22c55e; box-shadow: 0 0 15px #22c55e; }
+        .traffic-light.yellow { background: #eab308; box-shadow: 0 0 15px #eab308; }
+        .traffic-light.red { background: #ef4444; box-shadow: 0 0 15px #ef4444; }
+        
+        /* === SLIDERS === */
+        input[type="range"] { 
+            -webkit-appearance: none; 
+            height: 6px; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            width: 18px; 
+            height: 18px; 
+            background: #3b82f6; 
+            border-radius: 50%; 
+            cursor: pointer;
+        }
+        
+        /* === TAB CONTENT === */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeUp 0.3s ease-out; }
+        
+        /* === AREA BADGES === */
+        .area-badge { padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .area-old_city { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .area-it_corridor { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .area-central { background: rgba(249, 115, 22, 0.15); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3); }
+        .area-east { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .area-south { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+        
+        /* === LEAFLET === */
+        .leaflet-container { background: #0c0c0e !important; font-family: 'IBM Plex Sans', sans-serif; }
+        .leaflet-popup-content-wrapper { background: #1a1a1e; color: #e2e8f0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .leaflet-popup-tip { background: #1a1a1e; }
+        .leaflet-control-zoom a { background: #1a1a1e !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; }
+        .leaflet-control-attribution { background: rgba(18, 18, 22, 0.8) !important; color: #64748b !important; }
+        
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        
+        /* === STATUS BADGES === */
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        /* === COUNTER === */
+        .counter { display: inline-block; transition: all 0.3s ease; }
+        .counter.changing { color: #3b82f6; }
+    </style>
+</head>
+<body id="app-body">
+    <div id="app" class="min-h-screen">
+        <!-- Header -->
+        <header class="header h-[60px] bg-[#121216] border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-[#2563eb] flex items-center justify-center">
+                    <span class="text-lg">🛣️</span>
+                </div>
+                <div>
+                    <h1 class="text-base font-semibold tracking-wide text-white">CYBERABAD TRAFFIC NEXUS</h1>
+                    <p class="text-[9px] text-gray-500 tracking-widest font-mono">METRO COMMAND CENTER · HYDERABAD</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="holiday-badge" class="hidden px-3 py-1 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-xs font-medium"></div>
+                <div class="flex items-center gap-2 text-sm">
+                    <span id="api-status-dot" class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                    <span id="api-status-text" class="text-gray-400 text-xs">Connected</span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-card">
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span class="text-xs">Critical: <strong id="critical-count" class="font-mono counter">0</strong></span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-card">
+                    <span id="city-status-badge" class="status-badge" style="background: #eab308; color: #000;">Normal</span>
+                    <span id="vehicle-count" class="font-mono text-xs text-gray-400"><span id="vehicle-counter" class="counter">0</span> veh/hr</span>
+                </div>
+                <div class="text-right">
+                    <div id="live-clock" class="font-mono text-lg text-blue-400 font-medium">00:00:00</div>
+                    <div id="live-date" class="text-[9px] text-gray-500">Loading...</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="nav-tabs bg-[#121216] px-4 flex gap-1 overflow-x-auto border-b border-white/5">
+            <button data-tab="map" class="tab-btn active px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-blue-400 border-b-2 border-blue-400">
+                🗺️ LIVE MAP
+            </button>
+            <button data-tab="predict" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🤖 ML PREDICT
+            </button>
+            <button data-tab="forecast" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🔮 FORECAST
+            </button>
+            <button data-tab="analysis" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                📊 ANALYSIS
+            </button>
+            <button data-tab="segments" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🛣️ SEGMENTS
+            </button>
+            <button data-tab="sensors" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                📡 SENSORS
+            </button>
+            <button data-tab="alerts" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🚨 ALERTS
+            </button>
+            <button data-tab="optimizer" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🚦 SIGNAL OPT
+            </button>
+            <button data-tab="model" class="tab-btn px-4 py-3 text-xs font-medium whitespace-nowrap flex items-center gap-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300">
+                🧠 MODEL
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="p-6 max-w-[1700px] mx-auto">
+            
+            <!-- TAB 1: LIVE MAP -->
+            <section id="tab-map" class="tab-content active">
+                <!-- Stats Ticker -->
+                <div class="flex gap-4 p-4 rounded-lg glass-card mb-4 overflow-x-auto">
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">🚗</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">Vehicles Today</div><div id="vehicles-today" class="font-mono font-bold text-blue-400 counter">0</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">🌿</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">CO₂ Tracked</div><div id="co2-tracked" class="font-mono font-bold text-green-400 counter">0 kg</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">⏱️</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">Minutes Saved</div><div id="minutes-saved" class="font-mono font-bold text-purple-400 counter">0</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">🚨</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">Critical Roads</div><div id="critical-roads" class="font-mono font-bold text-red-400 counter">0</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">⚡</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">City Speed</div><div id="city-speed" class="font-mono font-bold text-yellow-400 counter">0 km/h</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">🍚</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">Biryani Index</div><div id="biryani-index" class="font-mono font-bold text-orange-400 counter">0.0</div></div>
+                    </div>
+                    <div class="flex items-center gap-3 pr-4 border-r border-white/5">
+                        <span class="text-xl">📊</span>
+                        <div><div class="text-[9px] text-gray-500 uppercase">RF Accuracy</div><div class="font-mono font-bold text-blue-400">92.89%</div></div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button id="emergency-toggle" onclick="toggleEmergency()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">
+                            🚑 Emergency
+                        </button>
+                        <button id="rain-toggle" onclick="toggleWeather()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">
+                            🌧️ Weather
+                        </button>
+                        <button id="vip-toggle" onclick="toggleVIP()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">
+                            👑 VIP
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Emergency Banner -->
+                <div id="emergency-mode-banner" class="hidden p-4 rounded-lg border border-red-500/50 mb-4 animate-fade-in-up">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🚑</span>
+                            <div>
+                                <div class="text-red-400 font-bold text-lg">🚨 EMERGENCY GREEN CORRIDOR ACTIVE</div>
+                                <div class="text-gray-400 text-xs">All traffic lights on ambulance route set to GREEN</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500">ETA to Destination</div>
+                            <div id="ambulance-eta" class="font-mono text-2xl text-cyan-400 font-bold">05:30</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <!-- Time Control -->
+                        <div class="flex gap-3 p-4 rounded-lg glass-card">
+                            <button id="live-mode-btn" onclick="setLiveMode()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">LIVE</button>
+                            <button id="time-travel-btn" onclick="setTimeTravelMode()" class="btn-primary px-4 py-2 rounded-md text-xs font-medium">⏰ TIME TRAVEL</button>
+                            <div class="flex-1 flex items-center gap-3">
+                                <input type="range" id="hour-slider" min="0" max="23" value="12" class="flex-1" oninput="updateHour()">
+                                <span id="hour-label" class="font-mono text-blue-400 min-w-[70px] text-xs">12:00 PM</span>
+                            </div>
+                            <div id="day-indicator" class="px-3 py-1 rounded-lg glass-card text-xs text-gray-400">Monday</div>
+                        </div>
+
+                        <!-- Traffic Light Predictions Panel -->
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                                <span class="text-lg">🚦</span>
+                                Traffic Light Predictions
+                            </h3>
+                            <div id="traffic-light-predictions" class="grid grid-cols-4 gap-3">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Forecast Preview -->
+                        <div id="forecast-preview" class="flex gap-3 p-4 rounded-lg glass-card cursor-pointer" onclick="switchTab('forecast')">
+                        </div>
+
+                        <!-- Leaflet Map -->
+                        <div class="relative rounded-lg overflow-hidden border border-white/5 h-[520px]">
+                            <div class="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
+                                <span class="px-3 py-1.5 rounded-md glass-card text-xs font-medium">🗺️ OSM</span>
+                                <span class="px-3 py-1.5 rounded-md glass-card text-xs font-medium">🚦 Traffic Lights</span>
+                                <span class="px-3 py-1.5 rounded-md glass-card text-xs font-medium">🌊 Green Wave</span>
+                                <span id="live-badge" class="px-3 py-1.5 rounded-md bg-green-500/90 text-xs font-bold">● LIVE</span>
+                                <span id="emergency-badge" class="hidden px-3 py-1.5 rounded-md bg-cyan-500/90 text-xs font-bold animate-blink">🚑 GREEN CORRIDOR</span>
+                                <span id="weather-badge" class="hidden px-3 py-1.5 rounded-md bg-blue-500/90 text-xs font-bold">🌧️ RAIN</span>
+                            </div>
+                            <div class="absolute bottom-3 left-3 z-[1000] p-3 rounded-lg glass-card max-w-[180px]">
+                                <div class="text-xs font-medium text-gray-400 mb-2">🚦 Signal Status</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="traffic-light green" style="width:14px;height:14px;"></span> Green (&lt;30s)</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="traffic-light yellow" style="width:14px;height:14px;"></span> Yellow (30-90s)</div>
+                                <div class="flex items-center gap-2 text-xs mb-2"><span class="traffic-light red" style="width:14px;height:14px;"></span> Red (&gt;90s)</div>
+                                <div class="text-xs font-medium text-gray-400 mb-2 pt-2 border-t border-white/5"> Areas</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Old City</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> IT Corridor</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Central</div>
+                                <div class="flex items-center gap-2 text-xs mb-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> East</div>
+                                <div class="flex items-center gap-2 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> South</div>
+                            </div>
+                            <div id="map" class="w-full h-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar -->
+                    <div class="space-y-4">
+                        <!-- City Overview -->
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                                <span>🏙️</span> City Overview
+                            </h3>
+                            <div class="flex items-center justify-between mb-3">
+                                <span id="overview-hour" class="font-mono text-xl counter">12:00 PM</span>
+                                <span id="overview-day" class="text-xs text-gray-500">Monday</span>
+                            </div>
+                            <span id="situation-badge" class="inline-block px-3 py-1 rounded text-xs font-bold mb-3" style="background: #eab308; color: #000;">Normal</span>
+                            <div class="progress-bar mb-4">
+                                <div id="congestion-fill" class="progress-fill" style="width: 50%; background: #eab308;"></div>
+                            </div>
+                            <div id="area-breakdown" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Junction Traffic Lights -->
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                                <span>🚦</span> Live Signal Status
+                            </h3>
+                            <div id="live-signals" class="space-y-2 max-h-[180px] overflow-y-auto">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Route Optimizer -->
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                                <span>🛤️</span> Route Optimizer
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-gray-500 mb-1 block">Origin Junction</label>
+                                    <select id="origin-select" class="w-full p-2.5 rounded-md glass-card text-xs focus:border-blue-500 outline-none"></select>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 mb-1 block">Destination Junction</label>
+                                    <select id="dest-select" class="w-full p-2.5 rounded-md glass-card text-xs focus:border-blue-500 outline-none"></select>
+                                </div>
+                                <button onclick="findRoute()" class="btn-primary w-full py-2.5 rounded-md text-xs font-medium">
+                                    🔍 FIND SHORTEST PATH
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Route Result -->
+                        <div id="route-result" class="hidden p-4 rounded-lg glass-card border border-blue-500/30 animate-fade-in-up">
+                            <h3 class="text-xs font-semibold mb-2">📍 Route Found</h3>
+                            <div id="route-details" class="space-y-2 text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: ML PREDICT -->
+            <section id="tab-predict" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6">
+                    <div class="p-5 rounded-lg glass-card space-y-4">
+                        <div>
+                            <h2 class="text-lg font-semibold flex items-center gap-2">
+                                <span>🤖</span> Random Forest Predictor
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-1">Adjust parameters for ML prediction</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>🚗 Car</span><span id="car-val" class="font-mono text-blue-400 counter">50</span></div>
+                                <input type="range" id="car-slider" min="0" max="300" value="50" class="w-full" oninput="updateSlider('car')">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>🏍️ Bike</span><span id="bike-val" class="font-mono text-blue-400 counter">30</span></div>
+                                <input type="range" id="bike-slider" min="0" max="100" value="30" class="w-full" oninput="updateSlider('bike')">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>🚌 Bus</span><span id="bus-val" class="font-mono text-blue-400 counter">10</span></div>
+                                <input type="range" id="bus-slider" min="0" max="50" value="10" class="w-full" oninput="updateSlider('bus')">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>🚛 Truck</span><span id="truck-val" class="font-mono text-blue-400 counter">15</span></div>
+                                <input type="range" id="truck-slider" min="0" max="50" value="15" class="w-full" oninput="updateSlider('truck')">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>🕐 Hour</span><span id="hour-val" class="font-mono text-blue-400">12:00 PM</span></div>
+                                <input type="range" id="pred-hour-slider" min="0" max="23" value="12" class="w-full" oninput="updateSlider('hour')">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 mb-1 block">📅 Day of Week</label>
+                                <select id="day-select" class="w-full p-2.5 rounded-md glass-card text-xs">
+                                    <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
+                                    <option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="holiday-check" class="w-3.5 h-3.5 rounded"><span class="text-xs">🎉 Holiday</span></label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="rain-check" class="w-3.5 h-3.5 rounded"><span class="text-xs">🌧️ Rain</span></label>
+                            </div>
+                        </div>
+                        <button onclick="runPrediction()" class="btn-primary w-full py-3 rounded-md text-sm font-medium">
+                            🚀 RUN RF MODEL
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div id="prediction-result" class="p-5 rounded-lg glass-card">
+                            <div class="flex flex-col items-center justify-center h-52 text-gray-500">
+                                <div class="text-5xl opacity-30 mb-3">🤖</div>
+                                <p class="text-sm">Set parameters and run the model</p>
+                            </div>
+                        </div>
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-3">📜 Prediction History</h3>
+                            <div id="prediction-history" class="space-y-2 max-h-44 overflow-y-auto">
+                                <div class="text-center text-gray-500 text-xs py-4">No predictions yet</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: FORECAST -->
+            <section id="tab-forecast" class="tab-content">
+                <div class="space-y-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
+                        <div class="p-5 rounded-lg glass-card text-center">
+                            <h3 class="text-xs text-gray-400 mb-3">Current Hour</h3>
+                            <div id="hero-score" class="font-mono text-6xl font-bold mb-3" style="color: #eab308;">45</div>
+                            <span id="hero-situation" class="inline-block px-3 py-1.5 rounded text-xs font-bold mb-3" style="background: #eab308; color: #000;">Normal</span>
+                            <div class="flex justify-center gap-5">
+                                <div><span class="text-xs text-gray-500">Speed</span><div id="hero-speed" class="font-mono text-blue-400 text-sm">35 km/h</div></div>
+                                <div><span class="text-xs text-gray-500">Delay</span><div id="hero-delay" class="font-mono text-blue-400 text-sm">5 min</div></div>
+                            </div>
+                        </div>
+                        <div id="next-hours-grid" class="grid grid-cols-6 gap-2"></div>
+                    </div>
+                    <div class="p-5 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-4 flex items-center gap-2">
+                            <span>📈</span> 24-Hour Congestion Forecast
+                        </h3>
+                        <div class="h-72"><canvas id="forecast-chart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: ANALYSIS -->
+            <section id="tab-analysis" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">📈 24-Hour Traffic Pattern</h3><div class="h-56"><canvas id="traffic-pattern-chart"></canvas></div></div>
+                    <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">🥧 Situation Distribution</h3><div class="h-56"><canvas id="situation-dist-chart"></canvas></div></div>
+                    <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">📅 Weekly Pattern</h3><div class="h-56"><canvas id="weekly-chart"></canvas></div></div>
+                    <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">🚗 Vehicle Types</h3><div class="h-56"><canvas id="vehicle-types-chart"></canvas></div></div>
+                </div>
+            </section>
+
+            <!-- TAB 5: SEGMENTS -->
+            <section id="tab-segments" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5">
+                    <div class="p-5 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-3">🛣️ Road Segments Status <span id="segments-count" class="text-xs text-gray-500">(30 roads)</span></h3>
+                        <div class="overflow-x-auto max-h-[550px] overflow-y-auto">
+                            <table class="w-full">
+                                <thead class="sticky top-0 glass-card"><tr class="text-left text-xs text-gray-500 uppercase">
+                                    <th class="py-2 px-2">#</th><th class="py-2 px-2">Road</th><th class="py-2 px-2">Area</th>
+                                    <th class="py-2 px-2">Score</th><th class="py-2 px-2">Speed</th><th class="py-2 px-2">Status</th>
+                                </tr></thead>
+                                <tbody id="segments-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">🔥 Top Congested</h3><div class="h-72"><canvas id="top-roads-chart"></canvas></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: SENSORS -->
+            <section id="tab-sensors" class="tab-content">
+                <div class="space-y-5">
+                    <!-- CCTV FEEDS -->
+                    <div class="p-4 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            LIVE TRAFFIC CAMERAS
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- CAM 1: Charminar -->
+                            <div class="rounded-md overflow-hidden border border-white/10">
+                                <div class="relative aspect-video bg-[#18181b]">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-4xl mb-1">🕌</div>
+                                            <div class="text-xs text-gray-400">CHARMINAR JUNCTION</div>
+                                        </div>
+                                    </div>
+                                    <div class="road-stream h-6 absolute top-1/2 left-0 right-0 -translate-y-1/2"></div>
+                                    <div class="stream-car" style="--delay: 0s; --top: 40%;"><span class="text-lg">🚗</span></div>
+                                    <div class="stream-car" style="--delay: 1.5s; --top: 44%;"><span class="text-sm">🏍️</span></div>
+                                    <div class="stream-car" style="--delay: 3s; --top: 52%;"><span class="text-lg">🚌</span></div>
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 rounded text-xs font-mono text-blue-400">CAM-01</div>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 bg-red-600 rounded text-xs font-medium">LIVE</div>
+                                    <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-400">17.3616°N 78.4747°E</div>
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-green-600 rounded text-xs font-medium">94 VPM</div>
+                                </div>
+                            </div>
+                            
+                            <!-- CAM 2: HITEC City -->
+                            <div class="rounded-md overflow-hidden border border-white/10">
+                                <div class="relative aspect-video bg-[#18181b]">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-4xl mb-1">🏢</div>
+                                            <div class="text-xs text-gray-400">HITEC CITY JUNCTION</div>
+                                        </div>
+                                    </div>
+                                    <div class="road-stream h-6 absolute top-1/2 left-0 right-0 -translate-y-1/2"></div>
+                                    <div class="stream-car" style="--delay: 0.5s; --top: 42%;"><span class="text-lg">🚗</span></div>
+                                    <div class="stream-car" style="--delay: 2s; --top: 48%;"><span class="text-sm">🚕</span></div>
+                                    <div class="stream-car" style="--delay: 3.5s; --top: 54%;"><span class="text-lg">🚗</span></div>
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 rounded text-xs font-mono text-purple-400">CAM-02</div>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 bg-red-600 rounded text-xs font-medium">LIVE</div>
+                                    <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-400">17.4417°N 78.3819°E</div>
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-yellow-600 rounded text-xs font-medium">QUEUE: 18</div>
+                                </div>
+                            </div>
+                            
+                            <!-- CAM 3: UPPAL -->
+                            <div class="rounded-md overflow-hidden border border-white/10">
+                                <div class="relative aspect-video bg-[#18181b]">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-4xl mb-1">🏘️</div>
+                                            <div class="text-xs text-gray-400">UPPAL CROSSROAD</div>
+                                        </div>
+                                    </div>
+                                    <div class="road-stream h-6 absolute top-1/2 left-0 right-0 -translate-y-1/2"></div>
+                                    <div class="stream-car" style="--delay: 0.3s; --top: 40%;"><span class="text-lg">🚗</span></div>
+                                    <div class="stream-car" style="--delay: 1.8s; --top: 46%;"><span class="text-sm">🛻</span></div>
+                                    <div class="stream-car" style="--delay: 2.8s; --top: 52%;"><span class="text-sm">🏍️</span></div>
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 rounded text-xs font-mono text-green-400">CAM-03</div>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 bg-red-600 rounded text-xs font-medium">LIVE</div>
+                                    <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-400">17.4089°N 78.5631°E</div>
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-green-600 rounded text-xs font-medium">78 VPM</div>
+                                </div>
+                            </div>
+                            
+                            <!-- CAM 4: MEHDIPATNAM -->
+                            <div class="rounded-md overflow-hidden border border-white/10">
+                                <div class="relative aspect-video bg-[#18181b]">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-4xl mb-1">🏪</div>
+                                            <div class="text-xs text-gray-400">MEHDIPATNAM</div>
+                                        </div>
+                                    </div>
+                                    <div class="road-stream h-6 absolute top-1/2 left-0 right-0 -translate-y-1/2"></div>
+                                    <div class="stream-car" style="--delay: 0.8s; --top: 40%;"><span class="text-lg">🚌</span></div>
+                                    <div class="stream-car" style="--delay: 2.2s; --top: 46%;"><span class="text-lg">🚗</span></div>
+                                    <div class="stream-car" style="--delay: 3.8s; --top: 52%;"><span class="text-sm">🚕</span></div>
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 rounded text-xs font-mono text-orange-400">CAM-04</div>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 bg-red-600 rounded text-xs font-medium">LIVE</div>
+                                    <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-400">17.3912°N 78.4323°E</div>
+                                    <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-red-600 rounded text-xs font-medium">HEAVY</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SENSOR CHART -->
+                    <div class="p-4 rounded-lg glass-card">
+                        <h3 class="text-base font-semibold mb-3 flex items-center gap-2">
+                            <span>📊</span> SENSOR DATA
+                        </h3>
+                        <div class="h-56"><canvas id="sensor-stream-chart"></canvas></div>
+                    </div>
+                    
+                    <!-- SENSOR CARDS -->
+                    <div class="grid grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">🚗</div><div class="text-[10px] text-gray-400">Vehicles</div><div id="sensor-loop" class="font-mono text-lg font-bold text-blue-400">156</div></div>
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">📸</div><div class="text-[10px] text-gray-400">Speed</div><div id="sensor-speed" class="font-mono text-lg font-bold text-purple-400">38</div></div>
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">🤖</div><div class="text-[10px] text-gray-400">AI</div><div class="font-mono text-sm font-bold text-green-400">ACTIVE</div></div>
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">🌧️</div><div class="text-[10px] text-gray-400">Weather</div><div id="sensor-weather" class="font-mono text-sm font-bold text-cyan-400">CLEAR</div></div>
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">⚠️</div><div class="text-[10px] text-gray-400">Alerts</div><div class="font-mono text-lg font-bold text-yellow-400">2</div></div>
+                        <div class="p-3 rounded-lg glass-card text-center"><div class="text-xl mb-1">🌿</div><div class="text-[10px] text-gray-400">CO₂</div><div id="sensor-co2" class="font-mono text-lg font-bold text-emerald-400">1847</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: ALERTS -->
+            <section id="tab-alerts" class="tab-content">
+                <div class="flex gap-4 mb-5">
+                    <div class="flex-1 p-4 rounded-lg glass-card text-center"><span class="text-xs text-gray-500">Total</span><div id="total-alerts-count" class="font-mono text-2xl font-bold text-blue-400 counter">0</div></div>
+                    <div class="flex-1 p-4 rounded-lg glass-card text-center border border-red-500/20"><span class="text-xs text-gray-500">Critical</span><div id="critical-alerts-count" class="font-mono text-2xl font-bold text-red-400 counter">0</div></div>
+                    <div class="flex-1 p-4 rounded-lg glass-card text-center border border-orange-500/20"><span class="text-xs text-gray-500">High</span><div id="high-alerts-count" class="font-mono text-2xl font-bold text-orange-400 counter">0</div></div>
+                </div>
+                <div id="alerts-feed" class="space-y-2 max-h-[550px] overflow-y-auto"></div>
+            </section>
+
+            <!-- TAB 8: SIGNAL OPTIMIZER -->
+            <section id="tab-optimizer" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
+                    <div>
+                        <h3 class="text-base font-semibold mb-3 flex items-center gap-2"><span>🚦</span> Signal Timing Optimization</h3>
+                        <div id="signal-cards" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-3">📊 City Performance</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Junctions</span><span class="font-mono text-xs font-medium">26</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Adaptive Signals</span><span class="font-mono text-xs font-medium">18</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Avg Cycle</span><span class="font-mono text-xs font-medium">90s</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Wait Reduction</span><span class="font-mono text-xs font-medium text-green-400">24%</span></div>
+                                <div class="flex justify-between py-2"><span class="text-xs text-gray-400">RF Accuracy</span><span class="font-mono text-xs font-medium text-blue-400">92.89%</span></div>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-lg glass-card">
+                            <h3 class="text-sm font-semibold mb-3">🌿 Environmental Impact</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">CO₂ Saved</span><span id="env-co2" class="font-mono text-xs font-medium text-green-400 counter">0 kg</span></div>
+                                <div class="flex justify-between py-2"><span class="text-xs text-gray-400">Minutes Saved</span><span id="env-minutes" class="font-mono text-xs font-medium text-green-400 counter">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 9: MODEL -->
+            <section id="tab-model" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div class="space-y-4">
+                        <div class="p-5 rounded-lg glass-card">
+                            <h3 class="text-base font-semibold mb-3">📊 Model Performance</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Algorithm</span><span class="font-mono text-xs font-medium">Random Forest</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">n_estimators</span><span class="font-mono text-xs font-medium">200</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">max_depth</span><span class="font-mono text-xs font-medium">15</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Features</span><span class="font-mono text-xs font-medium">12</span></div>
+                                <div class="flex justify-between py-2 border-b border-white/5"><span class="text-xs text-gray-400">Accuracy</span><span class="font-mono text-xs font-medium text-green-400">92.89%</span></div>
+                                <div class="flex justify-between py-2"><span class="text-xs text-gray-400">CSV Records</span><span class="font-mono text-xs font-medium text-blue-400">8,928</span></div>
+                            </div>
+                        </div>
+                        <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">📈 Class Distribution</h3><div class="h-56"><canvas id="class-dist-chart"></canvas></div></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-5 rounded-lg glass-card"><h3 class="text-base font-semibold mb-3">🎯 Feature Importance</h3><div class="h-56"><canvas id="feature-imp-chart"></canvas></div></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+        const STATUS_COLORS = { Low: '#22c55e', Normal: '#eab308', Heavy: '#f97316', High: '#ef4444' };
+        const AREA_COLORS = { OLD_CITY: '#ef4444', IT_CORRIDOR: '#3b82f6', CENTRAL: '#f97316', EAST: '#22c55e', SOUTH: '#8b5cf6' };
+        const AREA_NAMES = { OLD_CITY: 'Old City', IT_CORRIDOR: 'IT Corridor', CENTRAL: 'Central', EAST: 'East', SOUTH: 'South' };
+
+        let map = null;
+        let trafficData = {};
+        let markers = {}, segmentLines = {}, routeLines = {};
+        let isLiveMode = true, selectedHour = 12;
+        let emergencyMode = false, weatherMode = false, vipMode = false;
+        let forecastChart;
+        let signalTimers = {};
+
+        const junctionsList = [
+            {id: 1, name: "Gachibowli", area: "IT_CORRIDOR"}, {id: 2, name: "HITEC City", area: "IT_CORRIDOR"},
+            {id: 3, name: "Kukatpally", area: "IT_CORRIDOR"}, {id: 4, name: "Kondapur", area: "IT_CORRIDOR"},
+            {id: 5, name: "Nanakramguda", area: "IT_CORRIDOR"}, {id: 6, name: "Punjagutta", area: "CENTRAL"},
+            {id: 7, name: "Begumpet", area: "CENTRAL"}, {id: 8, name: "Banjara Hills", area: "CENTRAL"},
+            {id: 9, name: "Masab Tank", area: "CENTRAL"}, {id: 10, name: "Charminar", area: "OLD_CITY"},
+            {id: 11, name: "Chaderghat", area: "OLD_CITY"}, {id: 12, name: "Nampally", area: "OLD_CITY"},
+            {id: 13, name: "Koti", area: "OLD_CITY"}, {id: 14, name: "Madina Market", area: "OLD_CITY"},
+            {id: 15, name: "Laad Bazaar", area: "OLD_CITY"}, {id: 16, name: "Uppal Kalan ★", area: "EAST", highlight: true},
+            {id: 17, name: "Ghatkesar ★", area: "EAST", highlight: true}, {id: 18, name: "Habsiguda", area: "EAST"},
+            {id: 19, name: "Tarnaka", area: "EAST"}, {id: 20, name: "Mehdipatnam", area: "SOUTH"},
+            {id: 21, name: "Nanal Nagar", area: "SOUTH"}, {id: 22, name: "Bala Nagar", area: "SOUTH"},
+            {id: 23, name: "KBR Park", area: "CENTRAL"}, {id: 24, name: "Dilsukhnagar", area: "SOUTH"},
+            {id: 25, name: "LB Nagar", area: "SOUTH"}, {id: 26, name: "Shankarmutt", area: "CENTRAL"},
+        ];
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            initTabs();
+            populateSelects();
+            updateClock();
+            loadData();
+            setInterval(loadData, 5000);
+            setInterval(updateClock, 1000);
+            setInterval(loadAlerts, 10000);
+            setInterval(updateSignalCountdowns, 1000);
+            loadAlerts();
+        }
+
+        function initMap() {
+            if (map) return;
+            map = L.map('map', { center: [17.42, 78.50], zoom: 11, zoomControl: true, attributionControl: true });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd', maxZoom: 19
+            }).addTo(map);
+            updateMap();
+        }
+
+        function initTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('text-blue-400', 'border-blue-400');
+                        b.classList.add('text-gray-500', 'border-transparent');
+                    });
+                    btn.classList.remove('text-gray-500', 'border-transparent');
+                    btn.classList.add('text-blue-400', 'border-blue-400');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                    if (btn.dataset.tab === 'map') {
+                        initMap();
+                        setTimeout(() => map.invalidateSize(), 200);
+                    }
+                    if (btn.dataset.tab === 'forecast') initForecastChart();
+                    if (btn.dataset.tab === 'analysis') initAnalysisCharts();
+                    if (btn.dataset.tab === 'segments') initSegmentsTable();
+                    if (btn.dataset.tab === 'sensors') initSensorChart();
+                    if (btn.dataset.tab === 'model') initModelCharts();
+                });
+            });
+        }
+
+        function populateSelects() {
+            const originSelect = document.getElementById('origin-select');
+            const destSelect = document.getElementById('dest-select');
+            junctionsList.forEach(j => {
+                originSelect.innerHTML += `<option value="${j.id}">${j.name}</option>`;
+                destSelect.innerHTML += `<option value="${j.id}">${j.name}</option>`;
+            });
+            originSelect.selectedIndex = 0;
+            destSelect.selectedIndex = 5;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('live-date').textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById('overview-hour').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('overview-day').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('day-indicator').textContent = now.toLocaleDateString('en-US', { weekday: 'short' });
+        }
+
+        function animateCounter(element, value) {
+            element.classList.add('changing');
+            element.textContent = value;
+            setTimeout(() => element.classList.remove('changing'), 300);
+        }
+
+        async function loadData() {
+            try {
+                const hour = isLiveMode ? '' : '?hour=' + selectedHour;
+                const res = await fetch(API_BASE + '/api/traffic' + hour);
+                trafficData = await res.json();
+                updateUI();
+                updateMap();
+                updateTrafficLightPredictions();
+                updateLiveSignals();
+                updateForecastPreview();
+                updateSignalOptimizer();
+                updateSensorDisplay();
+            } catch (e) {}
+        }
+
+        function updateUI() {
+            const s = trafficData.stats || {};
+            animateCounter(document.getElementById('vehicles-today'), ((s.totalVehicles || 0) * 12).toLocaleString());
+            animateCounter(document.getElementById('co2-tracked'), (s.co2Tracked || 0).toLocaleString() + ' kg');
+            animateCounter(document.getElementById('minutes-saved'), (s.minutesSaved || 0).toLocaleString());
+            animateCounter(document.getElementById('critical-roads'), s.criticalRoads || 0);
+            animateCounter(document.getElementById('critical-count'), s.criticalRoads || 0);
+            animateCounter(document.getElementById('city-speed'), Math.round(45 - (s.avgScore || 50) * 0.3) + ' km/h');
+            animateCounter(document.getElementById('biryani-index'), (s.biryaniIndex || 3.0).toFixed(1));
+            animateCounter(document.getElementById('vehicle-counter'), (s.totalVehicles || 0).toLocaleString());
+            
+            const sit = s.citySituation || 'Normal';
+            document.getElementById('city-status-badge').textContent = sit;
+            document.getElementById('city-status-badge').style.background = STATUS_COLORS[sit];
+            document.getElementById('situation-badge').textContent = sit;
+            document.getElementById('situation-badge').style.background = STATUS_COLORS[sit];
+            document.getElementById('congestion-fill').style.width = (s.avgScore || 50) + '%';
+            document.getElementById('congestion-fill').style.background = STATUS_COLORS[sit];
+            
+            animateCounter(document.getElementById('env-co2'), (s.co2Tracked || 0).toLocaleString() + ' kg');
+            animateCounter(document.getElementById('env-minutes'), (s.minutesSaved || 0).toLocaleString());
+            
+            updateAreaBreakdown();
+            
+            if (trafficData.isHoliday) {
+                document.getElementById('holiday-badge').classList.remove('hidden');
+                document.getElementById('holiday-badge').textContent = '🎉 ' + (trafficData.holiday?.name || 'Holiday');
+                document.body.classList.add('festival-mode');
+            } else {
+                document.getElementById('holiday-badge').classList.add('hidden');
+                document.body.classList.remove('festival-mode');
+            }
+        }
+
+        function updateAreaBreakdown() {
+            const breakdown = trafficData.areaBreakdown || {};
+            const container = document.getElementById('area-breakdown');
+            container.innerHTML = Object.entries(breakdown).map(([area, data]) => `
+                <div class="flex items-center justify-between text-sm">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full" style="background: ${AREA_COLORS[area]}"></span>
+                        ${AREA_NAMES[area] || area}
+                    </span>
+                    <span class="font-mono" style="color: ${STATUS_COLORS[data.situation]}">${data.avgScore}%</span>
+                </div>
+            `).join('');
+        }
+
+        function updateTrafficLightPredictions() {
+            const container = document.getElementById('traffic-light-predictions');
+            const junctions = (trafficData.junctions || []).slice(0, 8);
+            container.innerHTML = junctions.map(j => {
+                const tl = j.trafficLight || {};
+                const waitTime = tl.time_remaining || 30;
+                let tlColor = 'red';
+                if (waitTime < 30) tlColor = 'green';
+                else if (waitTime < 90) tlColor = 'yellow';
+                
+                return `
+                    <div class="p-3 rounded-lg glass-card text-center animate-slide-in">
+                        <div class="traffic-light ${tlColor} mx-auto mb-2" style="width:28px;height:28px;"></div>
+                        <div class="text-xs text-gray-400 truncate">${j.name.substring(0, 8)}</div>
+                        <div class="font-mono text-lg font-bold" style="color: ${tlColor === 'green' ? '#22c55e' : tlColor === 'yellow' ? '#eab308' : '#ef4444'}">${waitTime}s</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateLiveSignals() {
+            const container = document.getElementById('live-signals');
+            const junctions = (trafficData.junctions || []).slice(0, 10);
+            container.innerHTML = junctions.map(j => {
+                const tl = j.trafficLight || {};
+                const waitTime = tl.time_remaining || 30;
+                let tlColor = 'red';
+                if (waitTime < 30) tlColor = 'green';
+                else if (waitTime < 90) tlColor = 'yellow';
+                const phase = tl.phase || 'NS_GREEN';
+                const nsActive = phase.includes('NS') && !phase.includes('YELLOW') && !phase.includes('RED');
+                
+                return `
+                    <div class="flex items-center gap-3 p-2 rounded-lg glass-card animate-slide-in">
+                        <div class="traffic-light ${tlColor}" style="width:20px;height:20px;"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold">${j.name.substring(0, 12)}</div>
+                            <div class="text-xs text-gray-500">${phase.replace('_', ' ')}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-mono font-bold" style="color: ${tlColor === 'green' ? '#22c55e' : '#ef4444'}">${waitTime}s</div>
+                            <div class="text-xs ${nsActive ? 'text-green-400' : 'text-gray-500'}">${nsActive ? '→ GO' : '→ WAIT'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateSignalCountdowns() {
+            Object.keys(signalTimers).forEach(jId => {
+                const timer = signalTimers[jId];
+                timer.remaining--;
+                if (timer.remaining <= 0) timer.remaining = timer.reset;
+                const el = document.getElementById('signal-timer-' + jId);
+                if (el) el.textContent = timer.remaining + 's';
+            });
+        }
+
+        // Get offset for junction marker to position it on road
+        function getJunctionRoadOffset(junction) {
+            const id = junction.id;
+            
+            // Pre-defined offsets to snap junctions to actual roads
+            const offsets = {
+                1: { lat: -0.002, lng: 0.001 },  // Gachibowli
+                2: { lat: 0.001, lng: -0.001 },  // HITEC City
+                3: { lat: 0.002, lng: 0.002 },   // Kukatpally
+                4: { lat: -0.001, lng: 0.002 },  // Kondapur
+                5: { lat: 0.001, lng: -0.002 },  // Nanakramguda
+                6: { lat: 0.002, lng: -0.001 },  // Punjagutta
+                7: { lat: 0.001, lng: 0.001 },   // Begumpet
+                8: { lat: -0.001, lng: 0.001 },  // Banjara Hills
+                9: { lat: -0.002, lng: -0.002 }, // Masab Tank
+                10: { lat: 0.002, lng: -0.001 }, // Charminar
+                11: { lat: 0.001, lng: 0.002 },  // Chaderghat
+                12: { lat: -0.001, lng: 0.001 },  // MJ Market
+                13: { lat: 0.002, lng: -0.002 },  // Koti
+                14: { lat: -0.002, lng: 0.001 }, // Madina Market
+                15: { lat: 0.001, lng: -0.001 },  // Laad Bazaar
+                16: { lat: -0.001, lng: 0.002 }, // Uppal Kalan
+                17: { lat: 0.002, lng: -0.001 }, // Ghatkesar
+                18: { lat: -0.002, lng: -0.001 }, // Habsiguda
+                19: { lat: 0.001, lng: 0.002 },  // Tarnaka
+                20: { lat: -0.001, lng: 0.001 }, // Mehdipatnam
+                21: { lat: 0.002, lng: -0.002 }, // Nanal Nagar
+                22: { lat: 0.001, lng: 0.001 },   // Bala Nagar
+                23: { lat: -0.002, lng: 0.002 }, // KBR Park
+                24: { lat: 0.001, lng: -0.001 }, // Dilsukhnagar
+                25: { lat: -0.001, lng: 0.002 }, // LB Nagar
+                26: { lat: 0.002, lng: 0.001 }   // Shankarmutt
+            };
+            
+            return offsets[id] || { lat: 0, lng: 0 };
+        }
+
+        // Create road path - use OSRM for real routing
+        async function createRoadPathOSRM(fromJ, toJ) {
+            const fromOffset = getJunctionRoadOffset(fromJ);
+            const toOffset = getJunctionRoadOffset(toJ);
+            const fromLat = fromJ.lat + fromOffset.lat;
+            const fromLng = fromJ.lng + fromOffset.lng;
+            const toLat = toJ.lat + toOffset.lat;
+            const toLng = toJ.lng + toOffset.lng;
+            
+            try {
+                // Use OSRM public API for real road routing
+                const response = await fetch(
+                    `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
+                );
+                const data = await response.json();
+                
+                if (data.routes && data.routes.length > 0) {
+                    // Return real road coordinates from OSRM
+                    return data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                }
+            } catch (e) {
+                console.log('OSRM routing failed, using fallback');
+            }
+            
+            // Fallback: simple straight line
+            return [[fromLat, fromLng], [toLat, toLng]];
+        }
+
+        // Create simple road path (fallback)
+        function createRoadPath(fromJ, toJ, segment) {
+            const fromOffset = getJunctionRoadOffset(fromJ);
+            const toOffset = getJunctionRoadOffset(toJ);
+            
+            const fLat = fromJ.lat + fromOffset.lat;
+            const fLng = fromJ.lng + fromOffset.lng;
+            const tLat = toJ.lat + toOffset.lat;
+            const tLng = toJ.lng + toOffset.lng;
+            
+            // Simple curved path between roads
+            const midLat = (fLat + tLat) / 2;
+            const midLng = (fLng + tLng) / 2;
+            const isEastWest = Math.abs(tLng - fLng) > Math.abs(tLat - fLat);
+            
+            let curveLat = midLat;
+            let curveLng = midLng;
+            
+            if (!isEastWest) {
+                curveLng = midLng + (segment.id % 2 === 0 ? 0.003 : -0.003);
+            } else {
+                curveLat = midLat + (segment.id % 2 === 0 ? 0.003 : -0.003);
+            }
+            
+            return [
+                [fLat, fLng],
+                [curveLat, curveLng],
+                [tLat, tLng]
+            ];
+        }
+
+        function updateMap() {
+            if (!map) return;
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+            
+            (trafficData.junctions || []).forEach(j => {
+                const tl = j.trafficLight || {};
+                const waitTime = tl.time_remaining || 30;
+                let tlColor = 'red';
+                if (waitTime < 30) tlColor = 'green';
+                else if (waitTime < 90) tlColor = 'yellow';
+                
+                const areaColor = AREA_COLORS[j.area] || '#64748b';
+                const highlightRing = j.highlight ? 'ring-2 ring-yellow-400 ring-4' : '';
+                const glowIntensity = j.score > 80 ? '0 0 40px ' + areaColor + 'aa' : '0 0 25px ' + areaColor + '66';
+                
+                // Adjust marker position to be on road (not in buildings)
+                const roadOffset = getJunctionRoadOffset(j);
+                const markerLat = j.lat + roadOffset.lat;
+                const markerLng = j.lng + roadOffset.lng;
+                
+                const icon = L.divIcon({
+                    className: 'traffic-light-container',
+                    html: `
+                        <div class="junction-marker ${highlightRing}" style="border: 5px solid ${areaColor}; box-shadow: ${glowIntensity}, 0 0 60px ${tlColor === 'green' ? 'rgba(34,197,94,0.5)' : tlColor === 'yellow' ? 'rgba(234,179,8,0.5)' : 'rgba(239,68,68,0.5)'}, inset 0 0 30px ${areaColor}40;">
+                            ${j.chronic ? '<div class="hotspot-ring"></div>' : ''}
+                            <div class="traffic-light ${tlColor}" style="transform: scale(1.4); width: 36px; height: 36px;"></div>
+                        </div>
+                    `,
+                    iconSize: [70, 70],
+                    iconAnchor: [35, 35]
+                });
+                
+                const marker = L.marker([markerLat, markerLng], { icon }).addTo(map);
+                
+                const areaLabel = j.area ? `<span class="area-badge area-${j.area.toLowerCase()}">${j.area.replace('_', ' ')}</span>` : '';
+                const highlightLabel = j.highlight ? '<div class="text-xs text-yellow-400 mt-1 font-bold animate-pulse">★ UPPAL / GHATKESAR ★</div>' : '';
+                const chronicLabel = j.chronic ? '<div class="text-xs text-red-400 font-bold animate-blink">⚠️ CHRONIC HOTSPOT</div>' : '';
+                
+                marker.bindPopup(`
+                    <div style="min-width: 220px; background: rgba(2, 6, 23, 0.95); padding: 12px; border-radius: 8px; border: 1px solid ${areaColor}50;">
+                        <div class="font-bold text-blue-400 text-lg mb-2">${j.name}</div>
+                        ${areaLabel} ${highlightLabel} ${chronicLabel}
+                        <div class="mt-3 pt-2 border-t border-gray-600 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <div class="traffic-light ${tlColor}" style="width:28px;height:28px;"></div>
+                                <div>
+                                    <div class="font-bold text-sm">${tl.phase || 'NS_GREEN'}</div>
+                                    <div class="text-xs text-gray-400">Wait: <span class="font-mono font-bold" style="color: ${tlColor === 'green' ? '#22c55e' : tlColor === 'yellow' ? '#eab308' : '#ef4444'}">${waitTime}s</span></div>
+                                </div>
+                            </div>
+                            <div><span class="text-gray-400">Vehicles:</span> <span class="font-mono font-bold text-white">${j.vehicleCount}</span></div>
+                            <div><span class="text-gray-400">Score:</span> <span class="font-mono font-bold" style="color: ${j.statusColor}">${j.score}%</span></div>
+                            <div><span class="text-gray-400">Speed:</span> <span class="font-mono">${j.speed} km/h</span></div>
+                            <div><span class="text-gray-400 text-xs">📍 ${j.lat.toFixed(4)}°N ${j.lng.toFixed(4)}°E</span></div>
+                            ${j.hotspot ? `<div class="text-xs text-orange-400 mt-1">📍 Hotspot: ${j.hotspot}</div>` : ''}
+                        </div>
+                    </div>
+                `);
+                markers[j.id] = marker;
+            });
+            
+            (trafficData.segments || []).forEach(s => {
+                const fromJ = (trafficData.junctions || []).find(j => j.id === s.from);
+                const toJ = (trafficData.junctions || []).find(j => j.id === s.to);
+                if (fromJ && toJ) {
+                    let lineColor = s.color;
+                    let weight = 4;
+                    let opacity = 0.7;
+                    
+                    if (emergencyMode && s.greenWave) {
+                        lineColor = '#00ffff';
+                        weight = 6;
+                        opacity = 0.9;
+                    } else if (s.score > 80) {
+                        lineColor = '#ef4444';
+                        weight = 6;
+                        opacity = 0.9;
+                    } else if (s.score > 60) {
+                        lineColor = '#f97316';
+                        weight = 5;
+                        opacity = 0.8;
+                    } else if (s.greenWave) {
+                        lineColor = '#22c55e';
+                        weight = 5;
+                        opacity = 0.8;
+                    }
+                    
+                    if (segmentLines[s.id]) {
+                        segmentLines[s.id].setStyle({ color: lineColor, weight, opacity });
+                    } else {
+                        // Create realistic road path (curved, not straight lines through buildings)
+                        const roadCoords = createRoadPath(fromJ, toJ, s);
+                        
+                        const line = L.polyline(roadCoords, { 
+                            color: lineColor, 
+                            weight, 
+                            opacity,
+                            smoothFactor: 2,
+                            className: s.score > 80 ? 'road-critical' : s.greenWave ? 'road-green-wave' : ''
+                        }).addTo(map);
+                        const greenWaveLabel = s.greenWave ? '<div class="text-xs text-cyan-400 font-bold">🌊 GREEN WAVE ROUTE</div>' : '';
+                        const chronicLabel = s.chronic ? '<div class="text-xs text-red-400 animate-blink">⚠️ CHRONIC CONGESTION</div>' : '';
+                        const hotspotLabel = s.hotspot ? `<div class="text-xs text-orange-400">📍 ${s.hotspot}</div>` : '';
+                        line.bindPopup(`
+                            <div style="min-width: 200px; background: rgba(2, 6, 23, 0.95); padding: 12px; border-radius: 8px;">
+                                <div class="font-bold text-blue-400 text-sm mb-1">${s.name}</div>
+                                <div class="text-xs text-gray-400 mb-2">${AREA_NAMES[s.area] || s.area}</div>
+                                ${greenWaveLabel} ${chronicLabel} ${hotspotLabel}
+                                <div class="mt-2 pt-2 border-t border-gray-600 space-y-1">
+                                    <div><span class="text-gray-400">Score:</span> <span class="font-mono font-bold" style="color: ${s.color}">${s.score}%</span></div>
+                                    <div><span class="text-gray-400">Speed:</span> <span class="font-mono">${s.speed} km/h</span></div>
+                                    <div><span class="text-gray-400">Lanes:</span> <span class="font-mono">${s.lanes}</span></div>
+                                    <div><span class="text-gray-400">Distance:</span> <span class="font-mono">${s.distance} km</span></div>
+                                </div>
+                            </div>
+                        `);
+                        segmentLines[s.id] = line;
+                    }
+                }
+            });
+        }
+
+        function updateForecastPreview() {
+            const container = document.getElementById('forecast-preview');
+            const segs = (trafficData.segments || []).slice(0, 3);
+            container.innerHTML = segs.map((s, i) => `
+                <div class="flex-1 p-3 rounded-lg glass-card text-center">
+                    <div class="text-xs text-gray-500 mb-2">${i === 0 ? 'Now' : '+' + i + 'h'}</div>
+                    <div class="font-mono text-2xl font-bold" style="color: ${s.color}">${s.score}%</div>
+                    <div class="text-xs mt-1" style="color: ${s.color}">${s.situation}</div>
+                    ${s.score > 60 ? '<div class="text-xs text-red-400 mt-1 animate-blink">⚠️ PEAK</div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateSensorDisplay() {
+            const sensors = trafficData.junctions || [];
+            if (sensors.length > 0) {
+                animateCounter(document.getElementById('sensor-loop'), Math.round(sensors[0].vehicleCount * 0.8));
+                animateCounter(document.getElementById('sensor-speed'), sensors[0].speed);
+                animateCounter(document.getElementById('sensor-co2'), Math.round(sensors[0].vehicleCount * 12));
+            }
+        }
+
+        function updateSignalOptimizer() {
+            const sorted = [...(trafficData.segments || [])].sort((a, b) => b.score - a.score).slice(0, 8);
+            document.getElementById('signal-cards').innerHTML = sorted.map(s => `
+                <div class="p-5 rounded-xl glass-card animate-slide-in">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-semibold">${s.name}</h4>
+                        <span class="font-mono text-xl font-bold" style="color: ${s.color}">${s.score}%</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="p-2 rounded glass-card text-center">
+                            <div class="text-[10px] text-gray-500">NS Green</div>
+                            <div class="font-mono text-sm font-semibold text-green-400">${Math.round(60 - s.score * 0.4)}s</div>
+                        </div>
+                        <div class="p-2 rounded glass-card text-center">
+                            <div class="text-[10px] text-gray-500">EW Green</div>
+                            <div class="font-mono text-sm font-semibold text-blue-400">${Math.round(30 + s.score * 0.3)}s</div>
+                        </div>
+                        <div class="p-2 rounded glass-card text-center">
+                            <div class="text-[10px] text-gray-500">Efficiency</div>
+                            <div class="font-mono text-sm font-semibold text-purple-400">${Math.round(100 - s.score * 0.5)}%</div>
+                        </div>
+                    </div>
+                    <div class="h-3 glass-card rounded overflow-hidden flex">
+                        <div class="h-full bg-green-500" style="width: ${Math.round(60 - s.score * 0.4)}%"></div>
+                        <div class="h-full bg-yellow-500" style="width: 5%"></div>
+                        <div class="h-full bg-red-500" style="width: ${Math.round(35 + s.score * 0.3)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setLiveMode() {
+            isLiveMode = true;
+            document.getElementById('live-mode-btn').classList.add('bg-green-500', 'text-white');
+            document.getElementById('live-mode-btn').classList.remove('bg-navy-700', 'text-gray-400');
+            document.getElementById('time-travel-btn').classList.remove('bg-purple-500', 'text-white');
+            document.getElementById('time-travel-btn').classList.add('bg-navy-700', 'text-gray-400');
+            document.getElementById('live-badge').classList.remove('hidden');
+            document.getElementById('hour-slider').disabled = true;
+            loadData();
+        }
+
+        function setTimeTravelMode() {
+            isLiveMode = false;
+            document.getElementById('time-travel-btn').classList.add('bg-purple-500', 'text-white');
+            document.getElementById('time-travel-btn').classList.remove('bg-navy-700', 'text-gray-400');
+            document.getElementById('live-mode-btn').classList.remove('bg-green-500', 'text-white');
+            document.getElementById('live-mode-btn').classList.add('bg-navy-700', 'text-gray-400');
+            document.getElementById('live-badge').classList.add('hidden');
+            document.getElementById('hour-slider').disabled = false;
+            loadData();
+        }
+
+        function updateHour() {
+            selectedHour = parseInt(document.getElementById('hour-slider').value);
+            const h = selectedHour;
+            document.getElementById('hour-label').textContent = h === 0 ? '12:00 AM' : h < 12 ? h + ':00 AM' : h === 12 ? '12:00 PM' : (h - 12) + ':00 PM';
+            if (!isLiveMode) loadData();
+        }
+
+        function switchTab(tab) {
+            document.querySelector(`[data-tab="${tab}"]`).click();
+        }
+
+        function updateSlider(type) {
+            const slider = document.getElementById(type + '-slider');
+            if (!slider) return;
+            const val = slider.value;
+            const display = document.getElementById(type + '-val');
+            if (display) {
+                if (type === 'hour') {
+                    const h = parseInt(val);
+                    display.textContent = h === 0 ? '12:00 AM' : h < 12 ? h + ':00 AM' : h === 12 ? '12:00 PM' : (h - 12) + ':00 PM';
+                } else {
+                    animateCounter(display, val);
+                }
+            }
+        }
+
+        async function runPrediction() {
+            const carCount = parseInt(document.getElementById('car-slider').value);
+            const bikeCount = parseInt(document.getElementById('bike-slider').value);
+            const busCount = parseInt(document.getElementById('bus-slider').value);
+            const truckCount = parseInt(document.getElementById('truck-slider').value);
+            const hour = parseInt(document.getElementById('pred-hour-slider').value);
+            const day = parseInt(document.getElementById('day-select').value);
+            const isHoliday = document.getElementById('holiday-check').checked;
+            const isRaining = document.getElementById('rain-check').checked;
+            
+            try {
+                const res = await fetch(API_BASE + '/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ carCount, bikeCount, busCount, truckCount, hour, day, holiday: isHoliday, raining: isRaining })
+                });
+                const result = await res.json();
+                displayPrediction(result);
+            } catch (e) {
+                displayPrediction({ prediction: 'Normal', confidence: 0.92, score: 50, speed: 35, delay: 10, probabilities: { Low: 0.2, Normal: 0.5, Heavy: 0.2, High: 0.1 } });
+            }
+        }
+
+        function displayPrediction(result) {
+            const container = document.getElementById('prediction-result');
+            const color = STATUS_COLORS[result.prediction] || '#3b82f6';
+            const sp = result.signalTiming || {};
+            
+            container.innerHTML = `
+                <div class="animate-slide-in">
+                    <div class="text-center p-8 rounded-2xl border-2 mb-6" style="border-color: ${color}; background: ${color}15;">
+                        <div class="text-5xl font-bold mb-2 animate-pulse-scale" style="color: ${color}">${result.prediction}</div>
+                        <div class="text-sm text-gray-400">Confidence: ${Math.round(result.confidence * 100)}%</div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="p-4 rounded-xl glass-card text-center animate-slide-in"><div class="text-xs text-gray-500">Score</div><div class="font-mono text-xl font-bold text-blue-400 counter">${result.score}%</div></div>
+                        <div class="p-4 rounded-xl glass-card text-center animate-slide-in delay-100"><div class="text-xs text-gray-500">Speed</div><div class="font-mono text-xl font-bold text-blue-400 counter">${result.speed} km/h</div></div>
+                        <div class="p-4 rounded-xl glass-card text-center animate-slide-in delay-200"><div class="text-xs text-gray-500">Delay</div><div class="font-mono text-xl font-bold text-blue-400 counter">${result.delay} min</div></div>
+                        <div class="p-4 rounded-xl glass-card text-center animate-slide-in delay-300"><div class="text-xs text-gray-500">Confidence</div><div class="font-mono text-xl font-bold text-blue-400 counter">${Math.round(result.confidence * 100)}%</div></div>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold mb-3">📊 Class Probabilities</h4>
+                        <div class="space-y-2">${Object.entries(result.probabilities || {}).map(([sit, prob]) => `
+                            <div class="flex items-center gap-3">
+                                <span class="w-16 text-sm">${sit}</span>
+                                <div class="flex-1 h-6 rounded overflow-hidden" style="background: #0d1b2a;">
+                                    <div class="h-full transition-all duration-500" style="width: ${prob * 100}%; background: ${STATUS_COLORS[sit]}"></div>
+                                </div>
+                                <span class="font-mono text-sm w-12 text-right">${Math.round(prob * 100)}%</span>
+                            </div>
+                        `).join('')}</div>
+                    </div>
+                    ${result.biryaniIndex ? `<div class="p-4 rounded-xl glass-card mb-4 border border-orange-500/30">
+                        <div class="text-sm text-orange-400">🍚 Biryani Index: ${result.biryaniIndex}</div>
+                    </div>` : ''}
+                    <div class="grid grid-cols-3 gap-4 p-4 rounded-xl glass-card">
+                        <div class="text-center"><div class="text-xs text-gray-500">NS Green</div><div class="font-mono text-lg font-semibold text-green-400">${sp.nsGreen}s</div></div>
+                        <div class="text-center"><div class="text-xs text-gray-500">EW Green</div><div class="font-mono text-lg font-semibold text-blue-400">${sp.ewGreen}s</div></div>
+                        <div class="text-center"><div class="text-xs text-gray-500">Cycle</div><div class="font-mono text-lg font-semibold text-purple-400">${sp.cycleTime}s</div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function findRoute() {
+            const origin = document.getElementById('origin-select').value;
+            const dest = document.getElementById('dest-select').value;
+            if (origin === dest) return;
+            
+            // Show loading
+            document.getElementById('route-result').classList.remove('hidden');
+            document.getElementById('route-details').innerHTML = '<div class="text-center p-4 text-gray-400">Calculating route...</div>';
+            
+            try {
+                const res = await fetch(API_BASE + '/api/route', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ origin: parseInt(origin), destination: parseInt(dest) })
+                });
+                const route = await res.json();
+                displayRoute(route);
+                await drawRouteOSRM(route);
+            } catch (e) {
+                document.getElementById('route-details').innerHTML = '<div class="text-center p-4 text-red-400">Route calculation failed</div>';
+            }
+        }
+
+        async function drawRouteOSRM(route) {
+            Object.values(routeLines).forEach(l => map.removeLayer(l));
+            routeLines = {};
+            
+            if (!route.path || route.path.length < 2) return;
+            
+            const originJ = trafficData.junctions?.find(j => j.id === route.path[0]);
+            const destJ = trafficData.junctions?.find(j => j.id === route.path[route.path.length - 1]);
+            
+            if (!originJ || !destJ) return;
+            
+            // Use OSRM for direct routing between origin and destination
+            const originOffset = getJunctionRoadOffset(originJ);
+            const destOffset = getJunctionRoadOffset(destJ);
+            const originLat = originJ.lat + originOffset.lat;
+            const originLng = originJ.lng + originOffset.lng;
+            const destLat = destJ.lat + destOffset.lat;
+            const destLng = destJ.lng + destOffset.lng;
+            
+            try {
+                // Fetch real route from OSRM
+                const response = await fetch(
+                    `https://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=full&geometries=geojson&steps=true`
+                );
+                const data = await response.json();
+                
+                if (data.routes && data.routes.length > 0) {
+                    const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                    
+                    // Draw route line
+                    const routeLine = L.polyline(coords, {
+                        color: '#00ffff',
+                        weight: 6,
+                        opacity: 0.9,
+                        dashArray: '15, 8'
+                    }).addTo(map);
+                    
+                    routeLines.main = routeLine;
+                    map.fitBounds(routeLine.getBounds(), { padding: [80, 80] });
+                    
+                    // Add start/end markers
+                    L.marker([originLat, originLng], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#00ff00;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px #00ff00;"></div>',
+                            iconSize: [16, 16]
+                        })
+                    }).addTo(map).bindPopup('Start: ' + originJ.name);
+                    
+                    L.marker([destLat, destLng], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#ff0000;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px #ff0000;"></div>',
+                            iconSize: [16, 16]
+                        })
+                    }).addTo(map).bindPopup('End: ' + destJ.name);
+                    
+                    // Update route info with real distance
+                    if (route.segments && route.segments.length > 0) {
+                        const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
+                        const durationMin = Math.round(data.routes[0].duration / 60);
+                        
+                        const resultDiv = document.getElementById('route-details');
+                        resultDiv.innerHTML = `
+                            <div class="p-3 rounded glass-card animate-slide-in">
+                                <div class="text-center mb-2">
+                                    <span class="text-cyan-400 font-mono text-lg">Route via Roads</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2 text-center">
+                                    <div><div class="text-xs text-gray-500">Distance</div><div class="font-mono font-bold">${distanceKm} km</div></div>
+                                    <div><div class="text-xs text-gray-500">Duration</div><div class="font-mono font-bold">${durationMin} min</div></div>
+                                    <div><div class="text-xs text-gray-500">Congestion</div><div class="font-mono font-bold" style="color:${route.color}">${route.avgCongestion}%</div></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return;
+                }
+            } catch (e) {
+                console.log('OSRM failed:', e);
+            }
+            
+            // Fallback if OSRM fails
+            drawRouteFallback(route);
+        }
+
+        function drawRouteFallback(route) {
+            // Simple fallback
+            const pathCoords = [];
+            route.path.forEach(jId => {
+                const j = trafficData.junctions?.find(j => j.id === jId);
+                if (j) {
+                    const offset = getJunctionRoadOffset(j);
+                    pathCoords.push([j.lat + offset.lat, j.lng + offset.lng]);
+                }
+            });
+            
+            if (pathCoords.length > 1) {
+                const routeLine = L.polyline(pathCoords, {
+                    color: '#00ffff',
+                    weight: 6,
+                    opacity: 0.9,
+                    dashArray: '15, 8'
+                }).addTo(map);
+                
+                routeLines.main = routeLine;
+                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+            }
+        }
+
+        function displayRoute(route) {
+            // Route info will be updated by drawRouteOSRM
+        }
+
+        function displayRouteDetails(route) {
+            const container = document.getElementById('route-result');
+            const resultDiv = document.getElementById('route-details');
+            container.classList.remove('hidden');
+            resultDiv.innerHTML = `
+                <div class="p-3 rounded glass-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-mono text-sm">${route.path?.length || 0} stops</span>
+                        <span class="font-mono text-lg font-bold" style="color: ${route.color || '#3b82f6'}">${route.avgCongestion}%</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div><div class="text-xs text-gray-500">Distance</div><div class="font-mono font-bold">${route.totalDistance} km</div></div>
+                        <div><div class="text-xs text-gray-500">Time</div><div class="font-mono font-bold">${route.estimatedTime} min</div></div>
+                        <div><div class="text-xs text-gray-500">Stops</div><div class="font-mono font-bold">${route.estimatedStops}</div></div>
+                    </div>
+                    ${route.greenWaveAvailable ? '<div class="mt-2 text-center text-cyan-400 text-sm">Green Wave Route Available</div>' : ''}
+                </div>
+            `;
+        }
+            resultDiv.innerHTML = `
+                <div class="flex justify-between items-center p-3 rounded glass-card animate-slide-in">
+                    <span class="font-mono">${route.path?.length || 0} junctions</span>
+                    <span class="font-mono text-lg font-bold" style="color: ${route.color || '#3b82f6'}">${route.avgCongestion}%</span>
+                </div>
+                <div class="mt-3 p-3 rounded glass-card grid grid-cols-3 gap-2 text-center animate-slide-in delay-100">
+                    <div><div class="text-xs text-gray-500">Distance</div><div class="font-mono font-bold">${route.totalDistance} km</div></div>
+                    <div><div class="text-xs text-gray-500">Time</div><div class="font-mono font-bold">${route.estimatedTime} min</div></div>
+                    <div><div class="text-xs text-gray-500">Stops</div><div class="font-mono font-bold">${route.estimatedStops}</div></div>
+                </div>
+                ${route.greenWaveAvailable ? '<div class="mt-2 p-2 rounded glass-card text-center text-cyan-400 text-sm animate-slide-in delay-200">🌊 Green Wave Available!</div>' : ''}
+            `;
+        }
+
+        async function toggleEmergency() {
+            emergencyMode = !emergencyMode;
+            const banner = document.getElementById('emergency-mode-banner');
+            const badge = document.getElementById('emergency-badge');
+            const btn = document.getElementById('emergency-toggle');
+            
+            if (emergencyMode) {
+                banner.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                btn.classList.add('bg-red-500/20', 'border-red-500', 'text-red-400');
+                btn.classList.remove('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                document.body.classList.add('emergency-mode');
+            } else {
+                banner.classList.add('hidden');
+                badge.classList.add('hidden');
+                btn.classList.remove('bg-red-500/20', 'border-red-500', 'text-red-400');
+                btn.classList.add('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                document.body.classList.remove('emergency-mode');
+            }
+            try { await fetch(API_BASE + '/api/emergency', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: emergencyMode }) }); } catch (e) {}
+            loadData();
+        }
+
+        async function toggleWeather() {
+            weatherMode = !weatherMode;
+            const btn = document.getElementById('rain-toggle');
+            const overlay = document.getElementById('rain-overlay');
+            const badge = document.getElementById('weather-badge');
+            
+            if (weatherMode) {
+                btn.classList.add('bg-blue-500/20', 'border-blue-500', 'text-blue-400');
+                btn.classList.remove('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                overlay.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                document.body.classList.add('rain-mode');
+                createRaindrops();
+            } else {
+                btn.classList.remove('bg-blue-500/20', 'border-blue-500', 'text-blue-400');
+                btn.classList.add('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                overlay.classList.add('hidden');
+                badge.classList.add('hidden');
+                document.body.classList.remove('rain-mode');
+                overlay.innerHTML = '';
+            }
+            try { await fetch(API_BASE + '/api/weather', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ condition: weatherMode ? 'Rain' : 'Clear' }) }); } catch (e) {}
+            loadData();
+        }
+
+        function createRaindrops() {
+            const overlay = document.getElementById('rain-overlay');
+            for (let i = 0; i < 50; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'rain-drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                overlay.appendChild(drop);
+            }
+        }
+
+        async function toggleVIP() {
+            vipMode = !vipMode;
+            const btn = document.getElementById('vip-toggle');
+            if (vipMode) {
+                btn.classList.add('bg-yellow-500/20', 'border-yellow-500', 'text-yellow-400');
+                btn.classList.remove('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                document.body.classList.add('vip-mode');
+            } else {
+                btn.classList.remove('bg-yellow-500/20', 'border-yellow-500', 'text-yellow-400');
+                btn.classList.add('bg-navy-700', 'border-gray-600', 'text-gray-400');
+                document.body.classList.remove('vip-mode');
+            }
+        }
+
+        async function initForecastChart() {
+            if (forecastChart) return;
+            try {
+                const res = await fetch(API_BASE + '/api/forecast');
+                const data = await res.json();
+                forecastChart = new Chart(document.getElementById('forecast-chart'), {
+                    type: 'line',
+                    data: { labels: data.map(d => d.hourLabel), datasets: [{ label: 'Congestion Score', data: data.map(d => d.score), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100, grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { display: false } } }
+                });
+                document.getElementById('hero-score').textContent = data[0]?.score || '--';
+                document.getElementById('hero-score').style.color = data[0]?.color || '#3b82f6';
+                document.getElementById('hero-situation').textContent = data[0]?.situation || 'Normal';
+                document.getElementById('hero-situation').style.background = data[0]?.color || '#eab308';
+                document.getElementById('hero-speed').textContent = (data[0]?.speed || 35) + ' km/h';
+                document.getElementById('hero-delay').textContent = (data[0]?.delay || 5) + ' min';
+                document.getElementById('next-hours-grid').innerHTML = data.slice(1, 7).map((d, i) => `
+                    <div class="p-4 rounded-xl glass-card text-center animate-slide-in" style="animation-delay: ${i * 0.1}s">
+                        <div class="text-xs text-gray-500 mb-2">+${i + 1}h</div>
+                        <div class="font-mono text-2xl font-bold" style="color: ${d.color}">${d.score}%</div>
+                        <div class="text-xs mt-1" style="color: ${d.color}">${d.situation}</div>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        async function initAnalysisCharts() {
+            try {
+                const res = await fetch(API_BASE + '/api/analysis');
+                const data = await res.json();
+                new Chart(document.getElementById('traffic-pattern-chart'), { type: 'line', data: { labels: data.hourly.labels, datasets: [{ label: 'Vehicles', data: data.hourly.vehicles, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { display: false } } } });
+                new Chart(document.getElementById('situation-dist-chart'), { type: 'doughnut', data: { labels: Object.keys(data.classDistribution), datasets: [{ data: Object.values(data.classDistribution), backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } } } } });
+                new Chart(document.getElementById('weekly-chart'), { type: 'bar', data: { labels: data.weekly.labels, datasets: [{ label: 'Vehicles', data: data.weekly.vehicles, backgroundColor: '#3b82f6' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } } });
+                new Chart(document.getElementById('vehicle-types-chart'), { type: 'line', data: { labels: data.hourly.labels, datasets: [{ label: 'Cars', data: data.hourly.cars, borderColor: '#3b82f6', tension: 0.4 }, { label: 'Bikes', data: data.hourly.bikes, borderColor: '#22c55e', tension: 0.4 }, { label: 'Buses', data: data.hourly.buses, borderColor: '#f97316', tension: 0.4 }, { label: 'Trucks', data: data.hourly.trucks, borderColor: '#ef4444', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } } } } });
+            } catch (e) {}
+        }
+
+        async function initSegmentsTable() {
+            try {
+                const res = await fetch(API_BASE + '/api/segments/detailed');
+                const data = await res.json();
+                const segments = data.segments || [];
+                document.getElementById('segments-count').textContent = `(${segments.length} roads)`;
+                document.getElementById('segments-table').innerHTML = segments.map(s => `
+                    <tr class="border-b border-navy-700/50 hover:bg-navy-700/30 transition-colors">
+                        <td class="py-3 px-2 font-mono text-sm">${s.id}</td>
+                        <td class="py-3 px-2 text-sm">${s.name}</td>
+                        <td class="py-3 px-2"><span class="area-badge area-${s.area?.toLowerCase()}">${AREA_NAMES[s.area] || s.area}</span></td>
+                        <td class="py-3 px-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-2 rounded overflow-hidden" style="background: #0d1b2a;"><div class="h-full" style="width: ${s.score}%; background: ${s.color}"></div></div>
+                                <span class="font-mono text-sm">${s.score}%</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-2 font-mono text-sm">${s.speed} km/h</td>
+                        <td class="py-3 px-2"><span class="px-2 py-0.5 rounded text-xs font-semibold" style="background: ${s.color}20; color: ${s.color}">${s.situation}</span></td>
+                    </tr>
+                `).join('');
+                new Chart(document.getElementById('top-roads-chart'), { type: 'bar', data: { labels: segments.slice(0, 8).map(s => s.name.substring(0, 20)), datasets: [{ label: 'Score', data: segments.slice(0, 8).map(s => s.score), backgroundColor: segments.slice(0, 8).map(s => s.color) }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { max: 100, grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, y: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { display: false } } } });
+            } catch (e) {}
+        }
+
+        function initSensorChart() {
+            const sensorData = Array.from({ length: 30 }, () => ({ total: 50 + Math.random() * 30, cars: 30 + Math.random() * 15 }));
+            new Chart(document.getElementById('sensor-stream-chart'), { type: 'line', data: { labels: Array.from({ length: 30 }, (_, i) => i), datasets: [{ label: 'Total', data: sensorData.map(d => d.total), borderColor: '#3b82f6', tension: 0.4 }, { label: 'Cars', data: sensorData.map(d => d.cars), borderColor: '#22c55e', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } } } } });
+            setInterval(() => {
+                sensorData.push({ total: 50 + Math.random() * 30, cars: 30 + Math.random() * 15 });
+                if (sensorData.length > 30) sensorData.shift();
+                const chart = Chart.getChart('sensor-stream-chart');
+                if (chart) { chart.data.datasets[0].data = sensorData.map(d => d.total); chart.data.datasets[1].data = sensorData.map(d => d.cars); chart.update('none'); }
+            }, 5000);
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch(API_BASE + '/api/alerts');
+                const alerts = await res.json();
+                animateCounter(document.getElementById('total-alerts-count'), alerts.length);
+                animateCounter(document.getElementById('critical-alerts-count'), alerts.filter(a => a.severity === 'critical').length);
+                animateCounter(document.getElementById('high-alerts-count'), alerts.filter(a => a.severity === 'high').length);
+                document.getElementById('alerts-feed').innerHTML = alerts.map((a, i) => `
+                    <div class="p-4 rounded-xl glass-card border-l-4 transition-all hover:translate-x-1 animate-slide-in" style="animation-delay: ${i * 0.05}s; border-color: ${a.severity === 'critical' ? '#ef4444' : a.severity === 'high' ? '#f97316' : '#eab308'}">
+                        <div class="flex items-start gap-4">
+                            <div class="px-3 py-1 rounded text-xs font-semibold ${a.severity === 'critical' ? 'bg-red-500/20 text-red-400' : a.severity === 'high' ? 'bg-orange-500/20 text-orange-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                                ${a.severity === 'critical' ? '<span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-1 animate-blink"></span>' : ''}
+                                ${a.severity.toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-semibold mb-1">${a.location}</div>
+                                <div class="text-sm text-gray-400 mb-1">${a.message}</div>
+                                <div class="text-xs text-blue-400">→ ${a.action}</div>
+                            </div>
+                            <div class="font-mono text-xs text-gray-500">${new Date(a.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function initModelCharts() {
+            new Chart(document.getElementById('class-dist-chart'), { type: 'bar', data: { labels: ['Low', 'Normal', 'Heavy', 'High'], datasets: [{ label: 'Records', data: [1138, 5279, 1819, 692], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { display: false } } } });
+            new Chart(document.getElementById('feature-imp-chart'), { type: 'bar', data: { labels: ['Total', 'CarCount', 'TruckCount', 'BusCount', 'Hour', 'RushHour'], datasets: [{ label: 'Importance', data: [32.4, 28.1, 15.3, 8.7, 5.2, 3.8], backgroundColor: '#3b82f6' }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { max: 35, grid: { color: '#1e3a5f' }, ticks: { color: '#64748b' } }, y: { grid: { display: false }, ticks: { color: '#64748b' } } }, plugins: { legend: { display: false } } } });
+        }
+    </script>
+</body>
+</html>
