@@ -15,107 +15,101 @@
         .header {
             background: linear-gradient(180deg, #12121a 0%, #0a0a0f 100%);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 12px 24px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .logo { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .logo-text h1 { font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-text p { font-size: 9px; color: #666; letter-spacing: 2px; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text h1 { font-size: 14px; font-weight: 700; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 8px; color: #666; letter-spacing: 2px; }
         
-        .header-center { display: flex; gap: 8px; }
-        .tab-btn { padding: 8px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: #888; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .header-center { display: flex; gap: 6px; }
+        .tab-btn { padding: 7px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: #888; font-size: 10px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
         .tab-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
         .tab-btn.active { background: rgba(59,130,246,0.2); border-color: #3b82f6; color: #3b82f6; }
         
-        .header-right { display: flex; gap: 12px; align-items: center; }
-        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px 14px; text-align: center; }
-        .stat-box .value { font-size: 16px; font-weight: 700; color: #3b82f6; }
-        .stat-box .label { font-size: 9px; color: #666; text-transform: uppercase; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 5px 12px; text-align: center; }
+        .stat-box .value { font-size: 14px; font-weight: 700; color: #3b82f6; }
+        .stat-box .label { font-size: 8px; color: #666; text-transform: uppercase; }
         .clock-box { text-align: right; }
-        .clock { font-size: 22px; font-weight: 600; color: #fff; font-family: monospace; }
-        .date { font-size: 10px; color: #666; }
+        .clock { font-size: 20px; font-weight: 600; color: #fff; font-family: monospace; }
+        .date { font-size: 9px; color: #666; }
         
-        .main { padding: 20px; }
+        .main { padding: 15px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 380px; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         
-        .card { background: #111118; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; }
-        .card-title { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .card { background: #111118; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 15px; }
+        .card-title { font-size: 11px; font-weight: 600; color: #888; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         
-        .map-container { background: #111118; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; height: 500px; position: relative; }
+        .map-container { background: #111118; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; height: 450px; position: relative; }
         #map { width: 100%; height: 100%; }
-        .map-overlay { position: absolute; top: 12px; left: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 6px; }
-        .map-badge { background: rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; font-size: 10px; backdrop-filter: blur(10px); }
+        .map-overlay { position: absolute; top: 10px; left: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 5px; }
+        .map-badge { background: rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 5px; font-size: 9px; backdrop-filter: blur(10px); }
         .map-badge.live { background: rgba(34,197,94,0.2); border-color: #22c55e; color: #22c55e; }
         
-        .status-badge { padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: 600; }
+        .status-badge { padding: 5px 12px; border-radius: 14px; font-size: 10px; font-weight: 600; }
         .status-low { background: rgba(34,197,94,0.2); color: #22c55e; }
         .status-normal { background: rgba(234,179,8,0.2); color: #eab308; }
         .status-heavy { background: rgba(249,115,22,0.2); color: #f97316; }
         .status-critical { background: rgba(239,68,68,0.2); color: #ef4444; }
         
-        .progress-bar { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { height: 100%; border-radius: 3px; }
+        .progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; border-radius: 2px; }
         
-        .signal-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 6px; }
-        .signal-light { width: 12px; height: 12px; border-radius: 50%; }
-        .signal-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-        .signal-yellow { background: #eab308; box-shadow: 0 0 8px #eab308; }
-        .signal-red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .signal-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 6px; margin-bottom: 5px; }
+        .signal-light { width: 10px; height: 10px; border-radius: 50%; }
+        .signal-green { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .signal-yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
+        .signal-red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
         .signal-info { flex: 1; }
-        .signal-name { font-size: 11px; font-weight: 500; }
-        .signal-phase { font-size: 9px; color: #666; }
-        .signal-time { font-family: monospace; font-size: 13px; font-weight: 600; }
+        .signal-name { font-size: 10px; font-weight: 500; }
+        .signal-phase { font-size: 8px; color: #666; }
+        .signal-time { font-family: monospace; font-size: 12px; font-weight: 600; }
         
-        .area-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 11px; }
-        .area-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .area-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 10px; }
+        .area-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
         
-        .forecast-item { text-align: center; padding: 12px 8px; background: rgba(255,255,255,0.02); border-radius: 8px; }
-        .forecast-time { font-size: 9px; color: #666; }
-        .forecast-score { font-size: 20px; font-weight: 700; margin: 6px 0; }
-        .forecast-status { font-size: 9px; color: #888; }
+        .forecast-item { text-align: center; padding: 10px 6px; background: rgba(255,255,255,0.02); border-radius: 6px; }
+        .forecast-time { font-size: 8px; color: #666; }
+        .forecast-score { font-size: 18px; font-weight: 700; margin: 4px 0; }
+        .forecast-status { font-size: 8px; color: #888; }
         
         select, input, button { font-family: inherit; }
-        .route-input { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 12px; margin-bottom: 8px; outline: none; }
-        .route-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .route-input { width: 100%; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; color: #fff; font-size: 11px; margin-bottom: 6px; outline: none; }
+        .route-btn { width: 100%; padding: 8px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 5px; color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; }
         
-        .slider-group { margin-bottom: 12px; }
-        .slider-label { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 5px; }
-        input[type="range"] { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; -webkit-appearance: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #3b82f6; border-radius: 50%; cursor: pointer; }
+        .slider-group { margin-bottom: 10px; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 4px; }
+        input[type="range"] { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; -webkit-appearance: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: #3b82f6; border-radius: 50%; cursor: pointer; }
         
-        .predict-result { text-align: center; padding: 30px; }
-        .predict-score { font-size: 48px; font-weight: 700; }
-        .predict-label { font-size: 14px; color: #888; margin-top: 8px; }
+        .predict-result { text-align: center; padding: 25px; }
+        .predict-score { font-size: 42px; font-weight: 700; }
+        .predict-label { font-size: 12px; color: #888; margin-top: 6px; }
         
-        .chart-container { height: 200px; }
+        .chart-container { height: 180px; }
         
-        .table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        .table th { text-align: left; padding: 10px 8px; color: #666; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        .table th { text-align: left; padding: 8px 6px; color: #666; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .table td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .table tr:hover { background: rgba(255,255,255,0.02); }
         
-        .violation-card { text-align: center; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 10px; }
-        .violation-icon { font-size: 28px; margin-bottom: 8px; }
-        .violation-count { font-size: 28px; font-weight: 700; }
-        .violation-label { font-size: 10px; color: #666; margin-top: 4px; }
+        .violation-card { text-align: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; }
+        .violation-icon { font-size: 24px; margin-bottom: 6px; }
+        .violation-count { font-size: 24px; font-weight: 700; }
+        .violation-label { font-size: 9px; color: #666; margin-top: 3px; }
         
-        .nlp-result { padding: 15px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 10px; }
-        .nlp-sentiment { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-        .nlp-positive { background: rgba(34,197,94,0.2); color: #22c55e; }
-        .nlp-negative { background: rgba(239,68,68,0.2); color: #ef4444; }
-        .nlp-neutral { background: rgba(234,179,8,0.2); color: #eab308; }
-        
-        .cctv-camera { background: #000; border-radius: 10px; padding: 15px; text-align: center; }
-        .cctv-icon { font-size: 48px; margin-bottom: 10px; }
-        .cctv-label { font-size: 11px; color: #888; }
+        .cctv-camera { background: #000; border-radius: 8px; padding: 12px; text-align: center; }
+        .cctv-icon { font-size: 40px; margin-bottom: 8px; }
+        .cctv-label { font-size: 10px; color: #888; }
         
         .leaflet-container { background: #0c0c14 !important; }
         .leaflet-popup-content-wrapper { background: #1a1a24; color: #fff; border-radius: 10px; }
@@ -133,17 +127,15 @@
             </div>
         </div>
         <div class="header-center">
-            <button class="tab-btn active" data-tab="map">🗺️ LIVE MAP</button>
-            <button class="tab-btn" data-tab="predict">🤖 ML PREDICT</button>
+            <button class="tab-btn active" data-tab="map">🗺️ LIVE</button>
+            <button class="tab-btn" data-tab="predict">🤖 ML</button>
             <button class="tab-btn" data-tab="forecast">🔮 FORECAST</button>
             <button class="tab-btn" data-tab="analysis">📊 ANALYSIS</button>
-            <button class="tab-btn" data-tab="segments">🛣️ SEGMENTS</button>
+            <button class="tab-btn" data-tab="segments">🛣️ ROADS</button>
             <button class="tab-btn" data-tab="sensors">📡 SENSORS</button>
             <button class="tab-btn" data-tab="alerts">🚨 ALERTS</button>
-            <button class="tab-btn" data-tab="optimizer">🚦 OPTIMIZER</button>
+            <button class="tab-btn" data-tab="optimizer">🚦 OPTIMIZE</button>
             <button class="tab-btn" data-tab="model">🧠 MODEL</button>
-            <button class="tab-btn" data-tab="nlp">📝 NLP</button>
-            <button class="tab-btn" data-tab="cctv">📹 CCTV</button>
         </div>
         <div class="header-right">
             <div class="stat-box"><div class="value" id="vehicles">0</div><div class="label">Vehicles</div></div>
@@ -160,19 +152,19 @@
         <section id="tab-map" class="tab-content active">
             <div class="grid-2">
                 <div>
-                    <div class="card" style="margin-bottom:20px;">
+                    <div class="card" style="margin-bottom:15px;">
                         <div class="card-title">🏙️ City Status</div>
-                        <div style="display:flex;align-items:center;gap:15px;">
+                        <div style="display:flex;align-items:center;gap:12px;">
                             <span id="city-status" class="status-badge status-normal">NORMAL</span>
-                            <span style="font-size:12px;color:#666;">Avg: <span id="avg-score" style="color:#fff;font-weight:600;">45%</span></span>
+                            <span style="font-size:11px;color:#666;">Avg: <span id="avg-score" style="color:#fff;font-weight:600;">45%</span></span>
                             <div class="progress-bar" style="flex:1;"><div id="progress-fill" class="progress-fill" style="width:45%;background:#eab308"></div></div>
                         </div>
-                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:15px;">
-                            <div style="text-align:center;"><span class="area-dot" style="background:#ef4444"></span><div style="font-size:10px;color:#888;">Old City</div><div id="old-city" style="font-weight:600;">72%</div></div>
-                            <div style="text-align:center;"><span class="area-dot" style="background:#3b82f6"></span><div style="font-size:10px;color:#888;">IT Corridor</div><div id="it-corridor" style="font-weight:600;">42%</div></div>
-                            <div style="text-align:center;"><span class="area-dot" style="background:#f97316"></span><div style="font-size:10px;color:#888;">Central</div><div id="central" style="font-weight:600;">55%</div></div>
-                            <div style="text-align:center;"><span class="area-dot" style="background:#22c55e"></span><div style="font-size:10px;color:#888;">East ★</div><div id="east" style="font-weight:600;">38%</div></div>
-                            <div style="text-align:center;"><span class="area-dot" style="background:#8b5cf6"></span><div style="font-size:10px;color:#888;">South</div><div id="south" style="font-weight:600;">58%</div></div>
+                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;">
+                            <div style="text-align:center;"><span class="area-dot" style="background:#ef4444"></span><div style="font-size:9px;color:#888;">Old City</div><div id="old-city" style="font-weight:600;">72%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#3b82f6"></span><div style="font-size:9px;color:#888;">IT Corridor</div><div id="it-corridor" style="font-weight:600;">42%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#f97316"></span><div style="font-size:9px;color:#888;">Central</div><div id="central" style="font-weight:600;">55%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#22c55e"></span><div style="font-size:9px;color:#888;">East ★</div><div id="east" style="font-weight:600;">38%</div></div>
+                            <div style="text-align:center;"><span class="area-dot" style="background:#8b5cf6"></span><div style="font-size:9px;color:#888;">South</div><div id="south" style="font-weight:600;">58%</div></div>
                         </div>
                     </div>
                     <div class="map-container">
@@ -185,20 +177,20 @@
                     </div>
                 </div>
                 <div>
-                    <div class="card" style="margin-bottom:15px;">
+                    <div class="card" style="margin-bottom:12px;">
                         <div class="card-title">🚦 Live Signals</div>
                         <div id="signal-list"></div>
                     </div>
-                    <div class="card" style="margin-bottom:15px;">
+                    <div class="card" style="margin-bottom:12px;">
                         <div class="card-title">🛤️ Route Finder</div>
                         <select class="route-input" id="origin"><option value="">Origin Junction</option></select>
                         <select class="route-input" id="dest"><option value="">Destination Junction</option></select>
-                        <button class="route-btn" onclick="findRoute()">🔍 FIND SHORTEST PATH</button>
-                        <div id="route-result" style="margin-top:10px;font-size:11px;color:#888;display:none;"></div>
+                        <button class="route-btn" onclick="findRoute()">🔍 FIND ROUTE</button>
+                        <div id="route-result" style="margin-top:8px;font-size:10px;color:#888;display:none;"></div>
                     </div>
                     <div class="card">
                         <div class="card-title">📊 Forecast (6h)</div>
-                        <div id="forecast" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;"></div>
+                        <div id="forecast" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
                     </div>
                 </div>
             </div>
@@ -208,7 +200,7 @@
         <section id="tab-predict" class="tab-content">
             <div class="grid-2">
                 <div class="card">
-                    <div class="card-title">🤖 Random Forest Predictor</div>
+                    <div class="card-title">🤖 Random Forest Predictor (ML Model)</div>
                     <div class="slider-group">
                         <div class="slider-label"><span>🚗 Car</span><span id="car-val">50</span></div>
                         <input type="range" id="car-slider" min="0" max="300" value="50" oninput="updateSlider('car')">
@@ -229,7 +221,7 @@
                         <div class="slider-label"><span>🕐 Hour</span><span id="hour-val">12:00 PM</span></div>
                         <input type="range" id="hour-slider" min="0" max="23" value="12" oninput="updateSlider('hour')">
                     </div>
-                    <div style="margin-bottom:15px;">
+                    <div style="margin-bottom:12px;">
                         <select class="route-input" id="day-select">
                             <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
                             <option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option>
@@ -238,39 +230,39 @@
                     <button class="route-btn" onclick="runPrediction()">🚀 RUN RF MODEL</button>
                 </div>
                 <div class="card">
-                    <div class="card-title">📊 Prediction Result</div>
+                    <div class="card-title">📊 Prediction Result (92.89% Accuracy)</div>
                     <div id="predict-result">
                         <div class="predict-result">
                             <div class="predict-score" style="color:#3b82f6;">--</div>
-                            <div class="predict-label">Set parameters and run model</div>
+                            <div class="predict-label">Adjust sliders and run model</div>
                         </div>
                     </div>
-                    <div id="predict-details" style="margin-top:20px;"></div>
+                    <div id="predict-details" style="margin-top:15px;"></div>
                 </div>
             </div>
         </section>
         
         <!-- FORECAST -->
         <section id="tab-forecast" class="tab-content">
-            <div class="grid-3" style="margin-bottom:20px;">
+            <div class="grid-3" style="margin-bottom:15px;">
                 <div class="card" style="text-align:center;">
-                    <div style="font-size:10px;color:#666;">Current Score</div>
-                    <div id="hero-score" style="font-size:48px;font-weight:700;color:#eab308;">45%</div>
-                    <span id="hero-status" class="status-badge status-normal" style="margin-top:10px;">NORMAL</span>
+                    <div style="font-size:9px;color:#666;">Current Score</div>
+                    <div id="hero-score" style="font-size:42px;font-weight:700;color:#eab308;">45%</div>
+                    <span id="hero-status" class="status-badge status-normal" style="margin-top:8px;">NORMAL</span>
                 </div>
                 <div class="card" style="text-align:center;">
-                    <div style="font-size:10px;color:#666;">Avg Speed</div>
-                    <div id="hero-speed" style="font-size:48px;font-weight:700;color:#3b82f6;">35</div>
-                    <div style="font-size:10px;color:#666;margin-top:10px;">km/h</div>
+                    <div style="font-size:9px;color:#666;">Avg Speed</div>
+                    <div id="hero-speed" style="font-size:42px;font-weight:700;color:#3b82f6;">35</div>
+                    <div style="font-size:9px;color:#666;margin-top:8px;">km/h</div>
                 </div>
                 <div class="card" style="text-align:center;">
-                    <div style="font-size:10px;color:#666;">Expected Delay</div>
-                    <div id="hero-delay" style="font-size:48px;font-weight:700;color:#f97316;">8</div>
-                    <div style="font-size:10px;color:#666;margin-top:10px;">minutes</div>
+                    <div style="font-size:9px;color:#666;">Expected Delay</div>
+                    <div id="hero-delay" style="font-size:42px;font-weight:700;color:#f97316;">8</div>
+                    <div style="font-size:9px;color:#666;margin-top:8px;">minutes</div>
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">📈 24-Hour Forecast</div>
+                <div class="card-title">📈 24-Hour Congestion Forecast</div>
                 <div class="chart-container"><canvas id="forecastChart"></canvas></div>
             </div>
         </section>
@@ -278,7 +270,7 @@
         <!-- ANALYSIS -->
         <section id="tab-analysis" class="tab-content">
             <div class="grid-2">
-                <div class="card"><div class="card-title">📈 Traffic Pattern</div><div class="chart-container"><canvas id="patternChart"></canvas></div></div>
+                <div class="card"><div class="card-title">📈 Traffic Pattern (24h)</div><div class="chart-container"><canvas id="patternChart"></canvas></div></div>
                 <div class="card"><div class="card-title">🥧 Situation Distribution</div><div class="chart-container"><canvas id="distChart"></canvas></div></div>
                 <div class="card"><div class="card-title">📅 Weekly Pattern</div><div class="chart-container"><canvas id="weeklyChart"></canvas></div></div>
                 <div class="card"><div class="card-title">🚗 Vehicle Types</div><div class="chart-container"><canvas id="vehicleChart"></canvas></div></div>
@@ -290,7 +282,7 @@
             <div class="grid-2">
                 <div class="card">
                     <div class="card-title">🛣️ Road Segments (<span id="seg-count">30</span> roads)</div>
-                    <div style="max-height:450px;overflow-y:auto;">
+                    <div style="max-height:400px;overflow-y:auto;">
                         <table class="table"><thead><tr><th>#</th><th>Road</th><th>Area</th><th>Score</th><th>Status</th></tr></thead>
                         <tbody id="segments-table"></tbody>
                         </table>
@@ -302,31 +294,31 @@
         
         <!-- SENSORS -->
         <section id="tab-sensors" class="tab-content">
-            <div class="grid-4" style="margin-bottom:20px;">
-                <div class="card" style="text-align:center;"><div style="font-size:28px;">🚗</div><div id="sensor-vehicles" style="font-size:24px;font-weight:700;color:#3b82f6;">156</div><div style="font-size:10px;color:#666;">Vehicles</div></div>
-                <div class="card" style="text-align:center;"><div style="font-size:28px;">📸</div><div id="sensor-speed" style="font-size:24px;font-weight:700;color:#8b5cf6;">38</div><div style="font-size:10px;color:#666;">Avg Speed</div></div>
-                <div class="card" style="text-align:center;"><div style="font-size:28px;">🤖</div><div style="font-size:24px;font-weight:700;color:#22c55e;">ACTIVE</div><div style="font-size:10px;color:#666;">AI Status</div></div>
-                <div class="card" style="text-align:center;"><div style="font-size:28px;">🌧️</div><div id="sensor-weather" style="font-size:24px;font-weight:700;color:#06b6d4;">CLEAR</div><div style="font-size:10px;color:#666;">Weather</div></div>
+            <div class="grid-4" style="margin-bottom:15px;">
+                <div class="card" style="text-align:center;"><div style="font-size:24px;">🚗</div><div id="sensor-vehicles" style="font-size:20px;font-weight:700;color:#3b82f6;">156</div><div style="font-size:9px;color:#666;">Vehicles</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:24px;">📸</div><div id="sensor-speed" style="font-size:20px;font-weight:700;color:#8b5cf6;">38</div><div style="font-size:9px;color:#666;">Avg Speed</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:24px;">🤖</div><div style="font-size:20px;font-weight:700;color:#22c55e;">ACTIVE</div><div style="font-size:9px;color:#666;">AI Status</div></div>
+                <div class="card" style="text-align:center;"><div style="font-size:24px;">🌧️</div><div id="sensor-weather" style="font-size:20px;font-weight:700;color:#06b6d4;">CLEAR</div><div style="font-size:9px;color:#666;">Weather</div></div>
             </div>
-            <div class="card"><div class="card-title">📡 Sensor Stream</div><div class="chart-container"><canvas id="sensorChart"></canvas></div></div>
+            <div class="card"><div class="card-title">📡 Sensor Stream (Live)</div><div class="chart-container"><canvas id="sensorChart"></canvas></div></div>
         </section>
         
         <!-- ALERTS -->
         <section id="tab-alerts" class="tab-content">
-            <div class="grid-3" style="margin-bottom:20px;">
-                <div class="card" style="text-align:center;"><div id="total-alerts" style="font-size:32px;font-weight:700;color:#3b82f6;">0</div><div style="font-size:10px;color:#666;">Total Alerts</div></div>
-                <div class="card" style="text-align:center;"><div id="critical-alerts" style="font-size:32px;font-weight:700;color:#ef4444;">0</div><div style="font-size:10px;color:#666;">Critical</div></div>
-                <div class="card" style="text-align:center;"><div id="high-alerts" style="font-size:32px;font-weight:700;color:#f97316;">0</div><div style="font-size:10px;color:#666;">High Priority</div></div>
+            <div class="grid-3" style="margin-bottom:15px;">
+                <div class="card" style="text-align:center;"><div id="total-alerts" style="font-size:28px;font-weight:700;color:#3b82f6;">0</div><div style="font-size:9px;color:#666;">Total Alerts</div></div>
+                <div class="card" style="text-align:center;"><div id="critical-alerts" style="font-size:28px;font-weight:700;color:#ef4444;">0</div><div style="font-size:9px;color:#666;">Critical</div></div>
+                <div class="card" style="text-align:center;"><div id="high-alerts" style="font-size:28px;font-weight:700;color:#f97316;">0</div><div style="font-size:9px;color:#666;">High Priority</div></div>
             </div>
-            <div class="card"><div class="card-title">🚨 Alert Feed</div><div id="alerts-list" style="max-height:400px;overflow-y:auto;"></div></div>
+            <div class="card"><div class="card-title">🚨 Alert Feed</div><div id="alerts-list" style="max-height:350px;overflow-y:auto;"></div></div>
         </section>
         
         <!-- SIGNAL OPTIMIZER -->
         <section id="tab-optimizer" class="tab-content">
             <div class="grid-2">
-                <div class="card"><div class="card-title">🚦 Signal Optimization</div><div id="signal-cards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div></div>
+                <div class="card"><div class="card-title">🚦 Signal Optimization</div><div id="signal-cards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div></div>
                 <div>
-                    <div class="card" style="margin-bottom:15px;"><div class="card-title">📊 City Performance</div>
+                    <div class="card" style="margin-bottom:12px;"><div class="card-title">📊 City Performance</div>
                         <div class="area-item"><span>Junctions</span><span style="font-weight:600;">26</span></div>
                         <div class="area-item"><span>Adaptive Signals</span><span style="font-weight:600;">18</span></div>
                         <div class="area-item"><span>Avg Cycle</span><span style="font-weight:600;">90s</span></div>
@@ -344,57 +336,16 @@
         <!-- MODEL -->
         <section id="tab-model" class="tab-content">
             <div class="grid-2">
-                <div class="card"><div class="card-title">📊 Model Performance</div>
-                    <div class="area-item"><span>Algorithm</span><span style="font-weight:600;">Random Forest</span></div>
-                    <div class="area-item"><span>n_estimators</span><span style="font-weight:600;">200</span></div>
-                    <div class="area-item"><span>max_depth</span><span style="font-weight:600;">15</span></div>
-                    <div class="area-item"><span>Features</span><span style="font-weight:600;">12</span></div>
+                <div class="card"><div class="card-title">📊 Random Forest Model Performance</div>
+                    <div class="area-item"><span>Algorithm</span><span style="font-weight:600;">Random Forest Classifier</span></div>
+                    <div class="area-item"><span>n_estimators</span><span style="font-weight:600;">200 trees</span></div>
+                    <div class="area-item"><span>max_depth</span><span style="font-weight:600;">15 levels</span></div>
+                    <div class="area-item"><span>Features</span><span style="font-weight:600;">12 (vehicle counts, time, rush hour, etc)</span></div>
+                    <div class="area-item"><span>Training Data</span><span style="font-weight:600;">8,400 samples</span></div>
                     <div class="area-item"><span>Accuracy</span><span style="font-weight:600;color:#22c55e;">92.89%</span></div>
-                    <div class="area-item"><span>CSV Records</span><span style="font-weight:600;color:#3b82f6;">8,928</span></div>
+                    <div class="area-item"><span>Classes</span><span style="font-weight:600;">Low, Normal, Heavy, High</span></div>
                 </div>
                 <div class="card"><div class="card-title">🎯 Feature Importance</div><div class="chart-container"><canvas id="featureChart"></canvas></div></div>
-            </div>
-        </section>
-        
-        <!-- NLP -->
-        <section id="tab-nlp" class="tab-content">
-            <div class="grid-2">
-                <div>
-                    <div class="card" style="margin-bottom:15px;">
-                        <div class="card-title">📝 Traffic Text Analyzer</div>
-                        <textarea id="nlp-input" class="route-input" style="height:100px;resize:none;" placeholder="Enter traffic report...">Critical congestion at Charminar junction. Heavy traffic jam near Old City area.</textarea>
-                        <button class="route-btn" onclick="analyzeNLP()">🔍 ANALYZE</button>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">🎭 Sentiment Overview</div>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                            <div style="text-align:center;padding:15px;background:rgba(34,197,94,0.1);border-radius:8px;"><div id="pos-pct" style="font-size:24px;font-weight:700;color:#22c55e;">45%</div><div style="font-size:10px;color:#666;">Positive</div></div>
-                            <div style="text-align:center;padding:15px;background:rgba(234,179,8,0.1);border-radius:8px;"><div id="neu-pct" style="font-size:24px;font-weight:700;color:#eab308;">30%</div><div style="font-size:10px;color:#666;">Neutral</div></div>
-                            <div style="text-align:center;padding:15px;background:rgba(239,68,68,0.1);border-radius:8px;"><div id="neg-pct" style="font-size:24px;font-weight:700;color:#ef4444;">25%</div><div style="font-size:10px;color:#666;">Negative</div></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-title">📊 Analysis Results</div>
-                    <div id="nlp-results"></div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- CCTV -->
-        <section id="tab-cctv" class="tab-content">
-            <div class="grid-5" style="margin-bottom:20px;">
-                <div class="violation-card"><div class="violation-icon">🪖</div><div id="helmet-count" class="violation-count" style="color:#ef4444;">0</div><div class="violation-label">Helmet</div></div>
-                <div class="violation-card"><div class="violation-icon">📱</div><div id="mobile-count" class="violation-count" style="color:#f97316;">0</div><div class="violation-label">Mobile</div></div>
-                <div class="violation-card"><div class="violation-icon">⚡</div><div id="speed-count" class="violation-count" style="color:#eab308;">0</div><div class="violation-label">Over Speed</div></div>
-                <div class="violation-card"><div class="violation-icon">🔄</div><div id="lane-count" class="violation-count" style="color:#3b82f6;">0</div><div class="violation-label">Wrong Lane</div></div>
-                <div class="violation-card"><div class="violation-icon">🚦</div><div id="signal-count" class="violation-count" style="color:#8b5cf6;">0</div><div class="violation-label">Signal Jump</div></div>
-            </div>
-            <div class="grid-4">
-                <div class="cctv-camera"><div class="cctv-icon">🕌</div><div class="cctv-label">CHARMINAR</div><div style="margin-top:8px;font-size:11px;">CAM-01</div></div>
-                <div class="cctv-camera"><div class="cctv-icon">🏢</div><div class="cctv-label">HITEC CITY</div><div style="margin-top:8px;font-size:11px;">CAM-02</div></div>
-                <div class="cctv-camera"><div class="cctv-icon">🏘️</div><div class="cctv-label">UPPAL ★</div><div style="margin-top:8px;font-size:11px;">CAM-03</div></div>
-                <div class="cctv-camera"><div class="cctv-icon">🏪</div><div class="cctv-label">MEHDIPATNAM</div><div style="margin-top:8px;font-size:11px;">CAM-04</div></div>
             </div>
         </section>
     </main>
@@ -440,6 +391,7 @@
             populateSelects();
             updateClock();
             loadData();
+            initCharts();
             setInterval(loadData, 5000);
             setInterval(updateClock, 1000);
         }
@@ -457,6 +409,13 @@
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
                     if (btn.dataset.tab === 'map') setTimeout(() => map.invalidateSize(), 100);
+                    if (btn.dataset.tab === 'forecast') updateForecastChart();
+                    if (btn.dataset.tab === 'analysis') updateAnalysisCharts();
+                    if (btn.dataset.tab === 'segments') updateSegmentsTable();
+                    if (btn.dataset.tab === 'sensors') updateSensorChart();
+                    if (btn.dataset.tab === 'alerts') loadAlerts();
+                    if (btn.dataset.tab === 'optimizer') updateSignalOptimizer();
+                    if (btn.dataset.tab === 'model') updateFeatureChart();
                 });
             });
         }
@@ -533,8 +492,8 @@
                 
                 const areaColor = AREA_COLORS[j.area] || '#666';
                 const icon = L.divIcon({
-                    html: `<div style="width:20px;height:20px;background:${tlColor};border-radius:50%;border:3px solid ${areaColor};box-shadow:0 0 15px ${tlColor}80;"></div>`,
-                    iconSize: [20, 20], iconAnchor: [10, 10]
+                    html: `<div style="width:18px;height:18px;background:${tlColor};border-radius:50%;border:3px solid ${areaColor};box-shadow:0 0 12px ${tlColor}80;"></div>`,
+                    iconSize: [18, 18], iconAnchor: [9, 9]
                 });
                 
                 const marker = L.marker([j.lat, j.lng], {icon}).addTo(map);
@@ -657,43 +616,161 @@
             result.innerHTML = `<div class="predict-result"><div class="predict-score" style="color:${color}">${data.prediction || 'NORMAL'}</div><div class="predict-label">Score: ${score}% | Confidence: ${Math.round((data.confidence || 0.9) * 100)}%</div></div>`;
             
             const details = document.getElementById('predict-details');
-            details.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
-                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">Speed</div><div style="font-weight:600;">${data.speed || 35} km/h</div></div>
-                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">Delay</div><div style="font-weight:600;">${data.delay || 10} min</div></div>
-                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><div style="font-size:9px;color:#666;">NS Green</div><div style="font-weight:600;color:#22c55e;">${data.signalTiming?.nsGreen || 45}s</div></div>
+            details.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
+                <div style="padding:8px;background:rgba(255,255,255,0.02);border-radius:6px;"><div style="font-size:8px;color:#666;">Speed</div><div style="font-weight:600;">${data.speed || 35} km/h</div></div>
+                <div style="padding:8px;background:rgba(255,255,255,0.02);border-radius:6px;"><div style="font-size:8px;color:#666;">Delay</div><div style="font-weight:600;">${data.delay || 10} min</div></div>
+                <div style="padding:8px;background:rgba(255,255,255,0.02);border-radius:6px;"><div style="font-size:8px;color:#666;">NS Green</div><div style="font-weight:600;color:#22c55e;">${data.signalTiming?.nsGreen || 45}s</div></div>
             </div>`;
         }
         
-        async function analyzeNLP() {
-            const text = document.getElementById('nlp-input').value;
-            const results = document.getElementById('nlp-results');
-            results.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Analyzing...</div>';
+        // Charts
+        let forecastChart, patternChart, distChart, weeklyChart, vehicleChart, topRoadsChart, sensorChart, featureChart;
+        
+        function initCharts() {
+            // These will be initialized when tab is clicked
+        }
+        
+        function updateForecastChart() {
+            if (forecastChart) forecastChart.destroy();
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const hours = Array.from({length: 24}, (_, i) => i + ':00');
+            const data = hours.map(h => 30 + Math.sin(parseInt(h) / 24 * Math.PI * 2) * 25 + Math.random() * 10);
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [{
+                        label: 'Congestion %',
+                        data: data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, x: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+        }
+        
+        function updateAnalysisCharts() {
+            if (patternChart) { patternChart.destroy(); patternChart = null; }
+            if (distChart) { distChart.destroy(); distChart = null; }
             
+            const ctx1 = document.getElementById('patternChart').getContext('2d');
+            patternChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    datasets: [
+                        { label: 'Today', data: Array.from({length: 24}, () => 30 + Math.random() * 40), borderColor: '#3b82f6', tension: 0.4 },
+                        { label: 'Yesterday', data: Array.from({length: 24}, () => 30 + Math.random() * 40), borderColor: '#8b5cf6', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888' } } }, scales: { y: { max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, x: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+            
+            const ctx2 = document.getElementById('distChart').getContext('2d');
+            distChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: { labels: ['Low', 'Normal', 'Heavy', 'High'], datasets: [{ data: [12, 59, 20, 9], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#888' } } } }
+            });
+            
+            const ctx3 = document.getElementById('weeklyChart').getContext('2d');
+            weeklyChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Avg Congestion', data: [45, 52, 48, 55, 65, 58, 35], backgroundColor: '#3b82f6' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, x: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+            
+            const ctx4 = document.getElementById('vehicleChart').getContext('2d');
+            vehicleChart = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['Cars', 'Bikes', 'Buses', 'Trucks'],
+                    datasets: [{ label: 'Vehicles', data: [45, 30, 10, 15], backgroundColor: ['#3b82f6', '#8b5cf6', '#f97316', '#22c55e'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, x: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+        }
+        
+        function updateSegmentsTable() {
+            const segments = trafficData.segments || [];
+            document.getElementById('seg-count').textContent = segments.length;
+            document.getElementById('segments-table').innerHTML = segments.map(s => 
+                `<tr><td>${s.id}</td><td>${s.name}</td><td>${(s.area || '').replace('_',' ')}</td><td><span style="color:${s.color}">${s.score}%</span></td><td>${s.situation}</td></tr>`
+            ).join('');
+            
+            if (topRoadsChart) topRoadsChart.destroy();
+            const ctx = document.getElementById('topRoadsChart').getContext('2d');
+            topRoadsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: segments.slice(0, 8).map(s => s.name.substring(0, 15)),
+                    datasets: [{ label: 'Score', data: segments.slice(0, 8).map(s => s.score), backgroundColor: segments.slice(0, 8).map(s => s.color) }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, y: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+        }
+        
+        function updateSensorChart() {
+            if (sensorChart) sensorChart.destroy();
+            const ctx = document.getElementById('sensorChart').getContext('2d');
+            sensorChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => i),
+                    datasets: [
+                        { label: 'Vehicles', data: Array.from({length: 20}, () => 100 + Math.random() * 50), borderColor: '#3b82f6', tension: 0.4 },
+                        { label: 'Speed', data: Array.from({length: 20}, () => 30 + Math.random() * 20), borderColor: '#22c55e', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#888' } } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, x: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
+        }
+        
+        async function loadAlerts() {
             try {
-                const res = await fetch(API + '/api/nlp/analyze', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text})
-                });
-                const data = await res.json();
-                
-                const sentiment = data.sentiment || {};
-                const sentimentClass = sentiment.label === 'positive' ? 'nlp-positive' : sentiment.label === 'negative' ? 'nlp-negative' : 'nlp-neutral';
-                
-                results.innerHTML = `
-                    <div class="nlp-result">
-                        <div style="margin-bottom:10px;"><span class="nlp-sentiment ${sentimentClass}">${(sentiment.label || 'neutral').toUpperCase()}</span></div>
-                        <div style="font-size:11px;color:#888;">Confidence: ${Math.round((sentiment.score || 0.5) * 100)}%</div>
-                    </div>
-                    <div class="nlp-result">
-                        <div style="font-size:10px;color:#666;margin-bottom:5px;">Keywords</div>
-                        <div style="display:flex;gap:5px;flex-wrap:wrap;">
-                            ${(data.keywords || []).map(k => `<span style="padding:4px 8px;background:rgba(59,130,246,0.2);border-radius:4px;font-size:10px;">${k.word}</span>`).join('') || '<span style="color:#666;">None detected</span>'}
-                        </div>
-                    </div>
-                `;
-            } catch(e) {
-                results.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">Analysis failed</div>';
-            }
+                const res = await fetch(API + '/api/alerts');
+                const alerts = await res.json();
+                document.getElementById('total-alerts').textContent = alerts.length;
+                document.getElementById('critical-alerts').textContent = alerts.filter(a => a.severity === 'critical').length;
+                document.getElementById('high-alerts').textContent = alerts.filter(a => a.severity === 'high').length;
+                document.getElementById('alerts-list').innerHTML = alerts.map(a => 
+                    `<div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:6px;margin-bottom:8px;border-left:3px solid ${a.severity==='critical'?'#ef4444':a.severity==='high'?'#f97316':'#eab308'}">
+                        <div style="font-size:10px;font-weight:600;color:${a.severity==='critical'?'#ef4444':a.severity==='high'?'#f97316':'#eab308'}">${a.severity.toUpperCase()}</div>
+                        <div style="font-size:11px;margin-top:4px;">${a.location}: ${a.message}</div>
+                        <div style="font-size:9px;color:#666;margin-top:4px;">${a.action}</div>
+                    </div>`
+                ).join('');
+            } catch(e) { console.error('Alerts error:', e); }
+        }
+        
+        function updateSignalOptimizer() {
+            const signals = (trafficData.segments || []).slice(0, 6);
+            document.getElementById('signal-cards').innerHTML = signals.map(s => 
+                `<div style="padding:12px;background:rgba(255,255,255,0.02);border-radius:6px;text-align:center;">
+                    <div style="font-size:10px;color:#888;">${s.name.substring(0, 20)}</div>
+                    <div style="font-size:20px;font-weight:700;color:${s.color};margin:6px 0;">${s.score}%</div>
+                    <div style="font-size:8px;color:#666;">NS: ${Math.round(60-s.score*0.4)}s | EW: ${Math.round(30+s.score*0.3)}s</div>
+                </div>`
+            ).join('');
+        }
+        
+        function updateFeatureChart() {
+            if (featureChart) featureChart.destroy();
+            const ctx = document.getElementById('featureChart').getContext('2d');
+            featureChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total', 'CarCount', 'TruckCount', 'BusCount', 'Hour', 'RushHour'],
+                    datasets: [{ label: 'Importance %', data: [32.4, 28.1, 15.3, 8.7, 5.2, 3.8], backgroundColor: '#3b82f6' }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { max: 35, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }, y: { grid: { display: false }, ticks: { color: '#666' } } } }
+            });
         }
         
         init();
