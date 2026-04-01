@@ -24,6 +24,7 @@ env/
 # Database
 *.db
 *.sqlite
+traffic_data.db
 
 # Logs
 *.log
@@ -37,7 +38,12 @@ nul
 # Models
 models/*.pkl
 models/*.joblib
+models/*.h5
 
 # Environment
 .env
 .env.local
+
+# Temp files
+*.tmp
+*.bak

@@ -25,6 +25,13 @@ import numpy as np
 import joblib
 import os
 
+try:
+    from ml_engine import get_ml_engine, TrafficMLEngine
+    ML_ENGINE_ENABLED = True
+except ImportError:
+    ML_ENGINE_ENABLED = False
+    print("ML Engine module not available")
+
 # Import custom modules
 try:
     from database import (
@@ -875,8 +882,8 @@ def api_green_wave():
 @app.route("/api/route", methods=["POST"])
 def api_route():
     data = request.get_json()
-    origin = data.get("origin")
-    dest = data.get("destination")
+    origin = data.get("from") or data.get("origin")
+    dest = data.get("to") or data.get("destination")
     
     def dijkstra(start, end, segments):
         graph = {}
@@ -977,18 +984,101 @@ def api_route():
 @app.route("/predict", methods=["POST"])
 def api_predict():
     data = request.get_json()
-    result = predict_traffic(
-        data.get("carCount", 50),
-        data.get("bikeCount", 30),
-        data.get("busCount", 10),
-        data.get("truckCount", 15),
-        data.get("hour", datetime.now().hour),
-        data.get("day", datetime.now().weekday()),
-        data.get("holiday", False),
-        data.get("raining", False),
-        data.get("emergency", emergency_mode)
-    )
+    car_count = data.get("carCount", 50)
+    bike_count = data.get("bikeCount", 30)
+    bus_count = data.get("busCount", 10)
+    truck_count = data.get("truckCount", 15)
+    hour = data.get("hour", datetime.now().hour)
+    day = data.get("day", datetime.now().weekday())
+    is_holiday = data.get("holiday", 0)
+    is_festival = data.get("festival", 0)
+    is_raining = data.get("raining", False)
+    is_emergency = data.get("emergency", emergency_mode)
+    
+    if ML_ENGINE_ENABLED:
+        try:
+            ml_engine = get_ml_engine()
+            ml_result = ml_engine.predict_traffic_situation(
+                car_count, bike_count, bus_count, truck_count,
+                hour, day, is_raining, is_emergency
+            )
+            if is_holiday or is_festival:
+                multiplier = 1.8 if (is_holiday and is_festival) else 1.5 if is_festival else 1.35
+                ml_result['score'] = min(100, int(ml_result['score'] * multiplier))
+                ml_result['prediction'] = 'Critical' if ml_result['score'] > 80 else 'High' if ml_result['score'] > 60 else 'Moderate'
+            return jsonify(ml_result)
+        except Exception as e:
+            print(f"ML Engine error: {e}")
+    
+    result = predict_traffic(car_count, bike_count, bus_count, truck_count, hour, day, is_holiday or is_festival, is_raining, is_emergency)
     return jsonify(result)
+
+@app.route("/api/ml/train", methods=["POST"])
+def api_ml_train():
+    """Retrain ML models"""
+    if ML_ENGINE_ENABLED:
+        try:
+            ml_engine = get_ml_engine()
+            stats = ml_engine.train_all_models()
+            ml_engine.save_models(os.path.join(os.path.dirname(__file__), 'models'))
+            return jsonify({"status": "success", "stats": stats})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+    return jsonify({"status": "error", "message": "ML Engine not available"})
+
+@app.route("/api/ml/status")
+def api_ml_status():
+    """Get ML engine status"""
+    if ML_ENGINE_ENABLED:
+        try:
+            ml_engine = get_ml_engine()
+            return jsonify({
+                "status": "online",
+                "is_trained": ml_engine.is_trained,
+                "training_stats": ml_engine.training_stats,
+                "available_models": list(ml_engine.models.keys()) if ml_engine.models else []
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+    return jsonify({"status": "unavailable"})
+
+@app.route("/api/ml/feature-importance")
+def api_ml_feature_importance():
+    """Get feature importance from ML models"""
+    if ML_ENGINE_ENABLED:
+        try:
+            ml_engine = get_ml_engine()
+            rf_importance = ml_engine.get_feature_importance('random_forest')
+            gb_importance = ml_engine.get_feature_importance('gradient_boosting')
+            return jsonify({
+                "random_forest": rf_importance,
+                "gradient_boosting": gb_importance
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)})
+    return jsonify({"error": "ML Engine not available"})
+
+@app.route("/api/ml/predict-advanced", methods=["POST"])
+def api_ml_predict_advanced():
+    """Advanced prediction using ensemble of models"""
+    if ML_ENGINE_ENABLED:
+        try:
+            data = request.get_json()
+            ml_engine = get_ml_engine()
+            result = ml_engine.predict_traffic_situation(
+                data.get("carCount", 50),
+                data.get("bikeCount", 30),
+                data.get("busCount", 10),
+                data.get("truckCount", 15),
+                data.get("hour", datetime.now().hour),
+                data.get("day", datetime.now().weekday()),
+                data.get("raining", False),
+                data.get("emergency", emergency_mode)
+            )
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({"error": str(e)})
+    return jsonify({"error": "ML Engine not available"})
 
 @app.route("/api/emergency", methods=["POST"])
 def api_emergency():
@@ -1312,17 +1402,12 @@ if __name__ == "__main__":
     print(f"  Hotspots: 7 | Ghatkesar & Uppal: Included")
     print("-" * 70)
     print("  Technologies:")
-    print("    ✓ Flask (Backend API)")
-    print("    ✓ SQLite (Database)")
-    print("    ✓ Pandas (Data Analysis)")
-    print("    ✓ NumPy (Computing)")
-    print("    ✓ scikit-learn (Random Forest ML)")
-    print("    ✓ Flask (Backend API)")
-    print("    ✓ SQLite (Database)")
-    print("    ✓ Pandas (Data Analysis)")
-    print("    ✓ NumPy (Computing)")
-    print("    ✓ scikit-learn (Random Forest ML)")
-    print("    ✓ AES Encryption (Security)")
+    print("    [+] Flask (Backend API)")
+    print("    [+] SQLite (Database)")
+    print("    [+] Pandas (Data Analysis)")
+    print("    [+] NumPy (Computing)")
+    print("    [+] scikit-learn (Random Forest ML)")
+    print("    [+] AES Encryption (Security)")
     print("-" * 70)
     print(f"  Database: {'Enabled' if DATABASE_ENABLED else 'Disabled'}")
     print(f"  Encryption: {'Enabled' if ENCRYPTION_ENABLED else 'Disabled'}")
